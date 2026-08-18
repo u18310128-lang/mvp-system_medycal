@@ -1,0 +1,634 @@
+<title>Ficha de recopilación de datos automatizada</title>
+
+<style>
+:root {
+  --ground: #F2F4F3;
+  --surface: #FFFFFF;
+  --surface-2: #EEF2F1;
+  --ink: #16211F;
+  --ink-2: #45524F;
+  --muted: #75837F;
+  --line: #D6DEDC;
+  --line-strong: #A9B7B3;
+  --accent: #0E5D50;
+  --accent-2: #146F5F;
+  --accent-soft: #E2EEEB;
+
+  --serif: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Mono", "SF Mono", Consolas, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #12100D;
+    --surface: #1B211F;
+    --surface-2: #222A27;
+    --ink: #E7ECEA;
+    --ink-2: #C2CCC8;
+    --muted: #8FA09B;
+    --line: #313B38;
+    --line-strong: #46524E;
+    --accent: #4FB8A2;
+    --accent-2: #6BC9B5;
+    --accent-soft: #12302A;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #12100D;
+  --surface: #1B211F;
+  --surface-2: #222A27;
+  --ink: #E7ECEA;
+  --ink-2: #C2CCC8;
+  --muted: #8FA09B;
+  --line: #313B38;
+  --line-strong: #46524E;
+  --accent: #4FB8A2;
+  --accent-2: #6BC9B5;
+  --accent-soft: #12302A;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.pagina {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 44px 20px 70px;
+}
+
+.hoja {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  padding: 40px 46px 34px;
+}
+
+/* ---------------- encabezado institucional ---------------- */
+
+.institucion {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 22px;
+}
+
+.institucion .marca {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.institucion .marca span { display: block; }
+.institucion .marca .fac { color: var(--ink-2); margin-top: 2px; font-size: 9.5px; letter-spacing: 0.1em; }
+
+.codigo-doc {
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.codigo-doc b { color: var(--ink-2); }
+
+.titulo-instrumento {
+  text-align: center;
+  margin: 6px 0 20px;
+}
+.titulo-instrumento .rot {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 9px;
+}
+.titulo-instrumento h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 25px;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+.titulo-instrumento .tema {
+  font-size: 13px;
+  color: var(--ink-2);
+  max-width: 60ch;
+  margin: 0 auto;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ---------------- bloque de metadatos ---------------- */
+
+.metabox {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 18px 22px;
+  margin-bottom: 26px;
+  display: grid;
+  gap: 14px;
+}
+
+.meta-fila {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  align-items: baseline;
+  gap: 12px;
+}
+.meta-fila > .lbl {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.periodo-opts {
+  display: flex;
+  gap: 26px;
+  flex-wrap: wrap;
+}
+.chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+.chk .caja {
+  width: 15px; height: 15px;
+  border: 1.6px solid var(--ink-2);
+  border-radius: 2px;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.chk small {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin-left: 2px;
+}
+
+.rango-fechas {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 13.5px;
+}
+.linea-fecha {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.linea-fecha .campo-fecha {
+  display: inline-block;
+  border-bottom: 1px solid var(--line-strong);
+  min-width: 96px;
+  padding: 1px 2px 2px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.linea-llenar {
+  display: block;
+  border-bottom: 1px solid var(--line-strong);
+  min-height: 19px;
+}
+
+/* ---------------- secciones e indicadores ---------------- */
+
+.seccion { margin-bottom: 26px; }
+
+.seccion-cab {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.seccion-num {
+  font-family: var(--serif);
+  font-size: 20px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.seccion-cab h2 {
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin: 0;
+  text-transform: uppercase;
+}
+.seccion-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 12px 30px;
+}
+
+table.indicadores {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+table.indicadores thead th {
+  background: var(--accent);
+  color: #FFFFFF;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 9px 14px;
+}
+table.indicadores thead th.col-valor { text-align: right; width: 190px; }
+table.indicadores thead th.col-ref { text-align: center; width: 58px; }
+
+table.indicadores tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  vertical-align: baseline;
+}
+table.indicadores tbody tr:last-child td { border-bottom: 0; }
+table.indicadores tbody tr:nth-child(even) td { background: var(--surface-2); }
+
+td.col-n {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--muted);
+  width: 24px;
+}
+td.col-ref {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+td.col-valor {
+  text-align: right;
+}
+.valor-linea {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 150px;
+  justify-content: flex-end;
+}
+.valor-blanco {
+  border-bottom: 1px solid var(--line-strong);
+  min-width: 74px;
+  height: 15px;
+}
+.valor-unidad {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ---------------- observaciones ---------------- */
+
+.obs-titulo {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 4px;
+}
+.obs-nota {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin: 0 0 12px;
+  max-width: 68ch;
+}
+.obs-lineas {
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 4px 16px 2px;
+}
+.obs-lineas .rl {
+  height: 25px;
+  border-bottom: 1px solid var(--line);
+}
+.obs-lineas .rl:last-child { border-bottom: 0; }
+
+/* ---------------- validación / cierre ---------------- */
+
+.cierre {
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.firma {
+  text-align: center;
+}
+.firma .raya {
+  border-top: 1px solid var(--ink-2);
+  margin: 46px 10px 8px;
+}
+.firma .rol {
+  font-size: 12.5px;
+  color: var(--ink);
+  font-weight: 600;
+}
+.firma .doc {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.pie-doc {
+  margin-top: 26px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+
+/* ---------------- controles de pantalla (no imprimen) ---------------- */
+
+.barra-accion {
+  max-width: 860px;
+  margin: 0 auto 18px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+.btn-imprimir {
+  font: inherit;
+  font-size: 13px;
+  font-family: var(--sans);
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 3px;
+  padding: 9px 18px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-imprimir:hover { background: var(--accent-2); }
+
+@media print {
+  body { background: #fff; }
+  .pagina { padding: 0; max-width: none; }
+  .hoja { border: 0; box-shadow: none; border-radius: 0; padding: 6mm 4mm; }
+  .barra-accion { display: none; }
+  table.indicadores tbody tr:nth-child(even) td { background: #F5F6F5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  table.indicadores thead th { background: #0E5D50 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: A4; margin: 12mm; }
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="barra-accion">
+  <button class="btn-imprimir" onclick="window.print()">Imprimir / Guardar como PDF</button>
+</div>
+
+<div class="pagina">
+  <div class="hoja">
+
+    <div class="institucion">
+      <div class="marca">
+        <span>Facultad de Ingeniería</span>
+        <span class="fac">Carrera de Ingeniería de Sistemas e Informática</span>
+      </div>
+      <div class="codigo-doc">
+        <div><b>Cód.</b> FRD-01</div>
+        <div><b>Versión</b> 1.0</div>
+      </div>
+    </div>
+
+    <div class="titulo-instrumento">
+      <span class="rot">Instrumento de investigación</span>
+      <h1>Ficha de recopilación de datos automatizada</h1>
+      <p class="tema">«Sistema web automatizado para reducir el ausentismo de pacientes en un consultorio privado en Lima, 2026»</p>
+    </div>
+
+    <div class="metabox">
+      <div class="meta-fila">
+        <span class="lbl">Periodo</span>
+        <div class="periodo-opts">
+          <span class="chk"><span class="caja"></span> PRETEST <small>histórico, proceso manual</small></span>
+          <span class="chk"><span class="caja"></span> POSTEST <small>con el sistema en operación</small></span>
+        </div>
+      </div>
+      <div class="meta-fila">
+        <span class="lbl">Rango de fechas</span>
+        <div class="rango-fechas">
+          <span class="linea-fecha">Desde <span class="campo-fecha">____ / ____</span> / 2026</span>
+          <span class="linea-fecha">Hasta <span class="campo-fecha">____ / ____</span> / 2026</span>
+        </div>
+      </div>
+      <div class="meta-fila">
+        <span class="lbl">Responsable</span>
+        <span class="linea-llenar"></span>
+      </div>
+      <div class="meta-fila">
+        <span class="lbl">Fuente de datos</span>
+        <span class="linea-llenar"></span>
+      </div>
+    </div>
+
+    <!-- ============ SECCIÓN I ============ -->
+    <div class="seccion">
+      <div class="seccion-cab">
+        <span class="seccion-num">I.</span>
+        <h2>Indicadores de la variable independiente</h2>
+      </div>
+      <p class="seccion-sub">Sistema web automatizado</p>
+
+      <table class="indicadores">
+        <thead>
+          <tr>
+            <th style="width:28px"></th>
+            <th>Métrica / indicador</th>
+            <th class="col-ref">Ref.</th>
+            <th class="col-valor">Valor registrado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-n">1</td>
+            <td>Tiempo promedio de registro de una cita</td>
+            <td class="col-ref">FT-01</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">min</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">2</td>
+            <td>Número total de citas registradas</td>
+            <td class="col-ref">FT-02</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">citas</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">3</td>
+            <td>Número total de recordatorios enviados</td>
+            <td class="col-ref">FT-03</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">msjs.</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">4</td>
+            <td>Porcentaje de recordatorios enviados exitosamente</td>
+            <td class="col-ref">FT-04</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">%</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">5</td>
+            <td>Porcentaje de citas confirmadas por usuarios</td>
+            <td class="col-ref">FT-05</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">%</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">6</td>
+            <td>Número total de citas reprogramadas</td>
+            <td class="col-ref">FT-06</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">citas</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">7</td>
+            <td>Número total de cancelaciones oportunas</td>
+            <td class="col-ref">FT-07</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">citas</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">8</td>
+            <td>Número de reportes de monitoreo generados</td>
+            <td class="col-ref">FT-08</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">reportes</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">9</td>
+            <td>Tiempo promedio de consulta de información</td>
+            <td class="col-ref">FT-09</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">seg.</span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============ SECCIÓN II ============ -->
+    <div class="seccion">
+      <div class="seccion-cab">
+        <span class="seccion-num">II.</span>
+        <h2>Indicadores de la variable dependiente</h2>
+      </div>
+      <p class="seccion-sub">Ausentismo de pacientes</p>
+
+      <table class="indicadores">
+        <thead>
+          <tr>
+            <th style="width:28px"></th>
+            <th>Métrica / indicador</th>
+            <th class="col-ref">Ref.</th>
+            <th class="col-valor">Valor registrado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-n">1</td>
+            <td>Tasa de ausentismo general</td>
+            <td class="col-ref">FT-10</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">%</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">2</td>
+            <td>Porcentaje de asistencia efectiva</td>
+            <td class="col-ref">FT-11</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">%</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">3</td>
+            <td>Número neto de citas perdidas (inasistencias)</td>
+            <td class="col-ref">FT-12</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">citas</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">4</td>
+            <td>Porcentaje de citas reprogramadas por ausentismo</td>
+            <td class="col-ref">FT-06</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">%</span></span></td>
+          </tr>
+          <tr>
+            <td class="col-n">5</td>
+            <td>Tiempo promedio de reprogramación post-inasistencia</td>
+            <td class="col-ref">FT-13</td>
+            <td class="col-valor"><span class="valor-linea"><span class="valor-blanco"></span><span class="valor-unidad">horas</span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============ OBSERVACIONES ============ -->
+    <div class="seccion">
+      <p class="obs-titulo">Observaciones técnicas de la base de datos / registros del sistema</p>
+      <p class="obs-nota">Anotar aquí cualquier incidencia relevante para la interpretación de los datos: caídas del servicio, fallas en la mensajería, feriados no considerados en la agenda, o cualquier evento que pueda distorsionar los indicadores del periodo evaluado.</p>
+      <div class="obs-lineas">
+        <div class="rl"></div>
+        <div class="rl"></div>
+        <div class="rl"></div>
+        <div class="rl"></div>
+        <div class="rl"></div>
+      </div>
+    </div>
+
+    <!-- ============ CIERRE ============ -->
+    <div class="cierre">
+      <div class="firma">
+        <div class="raya"></div>
+        <div class="rol">Responsable de extracción</div>
+        <div class="doc">Nombre, apellido y DNI</div>
+      </div>
+      <div class="firma">
+        <div class="raya"></div>
+        <div class="rol">V.° B.° Asesor de tesis</div>
+        <div class="doc">Nombre, apellido y firma</div>
+      </div>
+    </div>
+
+    <div class="pie-doc">
+      <span>Consultorio Perú Ruso · Lima, 2026</span>
+      <span>FRD-01 / v1.0 · Página 1 de 1</span>
+    </div>
+
+  </div>
+</div>

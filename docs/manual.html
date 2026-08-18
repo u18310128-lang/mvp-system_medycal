@@ -1,0 +1,978 @@
+<title>Manual técnico y de usuario — Sistema web automatizado de gestión de citas</title>
+
+<style>
+:root {
+  --ground: #F7F8F8;
+  --surface: #FFFFFF;
+  --surface-2: #EEF2F1;
+  --ink: #16211F;
+  --ink-2: #45524F;
+  --muted: #75837F;
+  --line: #DBE2E1;
+  --line-strong: #BDC8C6;
+  --accent: #0E5D50;
+  --accent-2: #146F5F;
+  --accent-soft: #E2EEEB;
+  --alert: #A6392B;
+  --alert-soft: #F8E9E6;
+  --warn: #8A6410;
+  --warn-soft: #F7F0DE;
+  --ok: #1D6B3F;
+
+  --serif: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Mono", "SF Mono", Consolas, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #111614;
+    --surface: #181E1C;
+    --surface-2: #202826;
+    --ink: #E4EAE8;
+    --ink-2: #BFC9C6;
+    --muted: #8B9995;
+    --line: #2A3230;
+    --line-strong: #3D4846;
+    --accent: #4FB8A2;
+    --accent-2: #6BC9B5;
+    --accent-soft: #10302A;
+    --alert: #E28270;
+    --alert-soft: #37211D;
+    --warn: #D6A84E;
+    --warn-soft: #322814;
+    --ok: #63B685;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground: #111614;
+  --surface: #181E1C;
+  --surface-2: #202826;
+  --ink: #E4EAE8;
+  --ink-2: #BFC9C6;
+  --muted: #8B9995;
+  --line: #2A3230;
+  --line-strong: #3D4846;
+  --accent: #4FB8A2;
+  --accent-2: #6BC9B5;
+  --accent-soft: #10302A;
+  --alert: #E28270;
+  --alert-soft: #37211D;
+  --warn: #D6A84E;
+  --warn-soft: #322814;
+  --ok: #63B685;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 1fr;
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 0 24px 96px;
+}
+
+@media (min-width: 1060px) {
+  .shell {
+    grid-template-columns: 236px minmax(0, 1fr);
+    gap: 60px;
+    padding: 0 40px 120px;
+  }
+}
+
+/* ---------- portada ---------- */
+
+.portada {
+  grid-column: 1 / -1;
+  border-bottom: 2px solid var(--ink);
+  padding: 56px 0 26px;
+  margin-bottom: 44px;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 16px;
+}
+
+.portada h1 {
+  font-family: var(--serif);
+  font-size: clamp(29px, 4.2vw, 44px);
+  line-height: 1.14;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  margin: 0 0 18px;
+  max-width: 21ch;
+}
+
+.portada .bajada {
+  font-size: 17px;
+  color: var(--ink-2);
+  max-width: 62ch;
+  margin: 0 0 26px;
+}
+
+.ficha {
+  display: flex;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  gap: 0;
+}
+.ficha div {
+  padding-right: 30px;
+  margin-right: 30px;
+  border-right: 1px solid var(--line);
+}
+.ficha div:last-child { border-right: 0; margin-right: 0; padding-right: 0; }
+.ficha dt {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 4px;
+}
+.ficha dd { margin: 0; font-size: 14px; font-variant-numeric: tabular-nums; }
+
+/* ---------- índice ---------- */
+
+.indice { display: none; }
+
+@media (min-width: 1060px) {
+  .indice {
+    display: block;
+    position: sticky;
+    top: 30px;
+    align-self: start;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.45;
+    padding-bottom: 30px;
+  }
+  .indice p.parte {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 22px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  .indice p.parte:first-child { margin-top: 0; }
+  .indice ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .indice a {
+    color: var(--ink-2);
+    text-decoration: none;
+    display: flex;
+    gap: 8px;
+    border-left: 2px solid var(--line);
+    padding-left: 11px;
+  }
+  .indice a b {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 400;
+    flex-shrink: 0;
+  }
+  .indice a:hover { color: var(--accent); border-left-color: var(--accent); }
+  .indice a:hover b { color: var(--accent); }
+}
+
+main { min-width: 0; }
+
+/* ---------- divisor de parte ---------- */
+
+.parte-div {
+  margin: 0 0 44px;
+  padding: 26px 0 20px;
+  border-top: 2px solid var(--accent);
+  border-bottom: 1px solid var(--line);
+}
+.parte-div:not(:first-child) { margin-top: 76px; }
+.parte-div .rot {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 8px;
+}
+.parte-div h2 {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: -0.012em;
+  margin: 0 0 8px;
+}
+.parte-div p { margin: 0; color: var(--muted); font-size: 14.5px; max-width: 62ch; }
+
+/* ---------- secciones ---------- */
+
+section { margin-bottom: 60px; scroll-margin-top: 24px; }
+
+section > h3 {
+  font-family: var(--serif);
+  font-size: 23px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: -0.008em;
+  margin: 0 0 6px;
+  text-wrap: balance;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+section > h3 .n {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.intro {
+  color: var(--ink-2);
+  max-width: 66ch;
+  margin: 0 0 26px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+h4 {
+  font-size: 15px;
+  font-weight: 650;
+  margin: 32px 0 12px;
+}
+
+h5 {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+  margin: 26px 0 10px;
+}
+
+p { max-width: 68ch; margin: 0 0 15px; }
+main ul, main ol { max-width: 68ch; padding-left: 21px; margin: 0 0 18px; }
+main li { margin-bottom: 6px; }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+pre {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 0 0 20px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+
+strong { font-weight: 650; }
+a { color: var(--accent); }
+
+/* ---------- tablas ---------- */
+
+.tabla {
+  overflow-x: auto;
+  margin: 0 0 22px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+}
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.5; }
+thead th {
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--surface-2);
+  padding: 10px 13px;
+  border-bottom: 1px solid var(--line-strong);
+  white-space: nowrap;
+}
+tbody td { padding: 9px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tbody tr:last-child td { border-bottom: 0; }
+td.m { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+td.m.acc { color: var(--accent); }
+
+.verbo {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+}
+.v-get { color: var(--ok); }
+.v-post { color: var(--accent); }
+
+/* ---------- avisos ---------- */
+
+.aviso {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  padding: 15px 19px;
+  margin: 22px 0;
+  border-radius: 0 3px 3px 0;
+  font-size: 14.5px;
+}
+.aviso.riesgo { border-left-color: var(--alert); }
+.aviso.ojo { border-left-color: var(--warn); }
+.aviso p { margin: 0 0 9px; max-width: 63ch; }
+.aviso p:last-child { margin-bottom: 0; }
+.aviso .rot {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 6px;
+}
+.aviso.riesgo .rot { color: var(--alert); }
+.aviso.ojo .rot { color: var(--warn); }
+
+/* ---------- figura ---------- */
+
+figure {
+  margin: 24px 0 28px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.fig-scroll { overflow-x: auto; padding: 22px 18px 6px; }
+figure svg { display: block; width: 100%; height: auto; min-width: 600px; }
+figcaption {
+  font-size: 12.5px;
+  color: var(--muted);
+  padding: 11px 18px 15px;
+  border-top: 1px solid var(--line);
+  margin-top: 10px;
+}
+figcaption b { color: var(--ink-2); font-weight: 650; }
+
+.nb { fill: var(--surface-2); stroke: var(--line-strong); stroke-width: 1; }
+.nc { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.3; }
+.t  { font-family: var(--sans); font-size: 11.5px; fill: var(--ink); }
+.tb { font-family: var(--sans); font-size: 11.5px; font-weight: 650; fill: var(--ink); }
+.tm { font-family: var(--mono); font-size: 9.5px; fill: var(--muted); letter-spacing: 0.08em; }
+.ta { font-family: var(--sans); font-size: 10.5px; fill: var(--muted); }
+.la { stroke: var(--accent); stroke-width: 1.4; fill: none; }
+
+/* ---------- pasos ---------- */
+
+.pasos { counter-reset: paso; list-style: none; padding: 0; margin: 0 0 24px; max-width: 68ch; }
+.pasos li {
+  counter-increment: paso;
+  position: relative;
+  padding-left: 40px;
+  margin-bottom: 18px;
+}
+.pasos li::before {
+  content: counter(paso);
+  position: absolute;
+  left: 0; top: 1px;
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  background: var(--accent);
+  color: var(--surface);
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+:root[data-theme="dark"] .pasos li::before,
+:root:not([data-theme="light"]) .pasos li::before { color: #111614; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .pasos li::before { color: #FFFFFF; }
+}
+.pasos li b { display: block; margin-bottom: 2px; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="shell">
+
+<header class="portada">
+  <p class="eyebrow">Anexo · Documentación del sistema</p>
+  <h1>Manual técnico y de usuario</h1>
+  <p class="bajada">Sistema web automatizado para reducir el ausentismo de pacientes. Consultorio Perú Ruso, Lima, 2026. Instalación, arquitectura, referencia de la interfaz de programación y guía de operación para el personal.</p>
+  <dl class="ficha">
+    <div><dt>Versión</dt><dd>0.1.0</dd></div>
+    <div><dt>Base de datos</dt><dd>PostgreSQL 18.4</dd></div>
+    <div><dt>Ejecución</dt><dd>Node.js 26 · Express 5</dd></div>
+    <div><dt>Automatización</dt><dd>n8n 2.33.3</dd></div>
+  </dl>
+</header>
+
+<nav class="indice" aria-label="Índice">
+  <p class="parte">Parte I · Técnico</p>
+  <ol>
+    <li><a href="#s1"><b>1</b>Arquitectura</a></li>
+    <li><a href="#s2"><b>2</b>Instalación</a></li>
+    <li><a href="#s3"><b>3</b>Modelo de datos</a></li>
+    <li><a href="#s4"><b>4</b>Interfaz de programación</a></li>
+    <li><a href="#s5"><b>5</b>Motor de recordatorios</a></li>
+    <li><a href="#s6"><b>6</b>Pruebas y verificación</a></li>
+  </ol>
+  <p class="parte">Parte II · Usuario</p>
+  <ol>
+    <li><a href="#s7"><b>7</b>Agenda del día</a></li>
+    <li><a href="#s8"><b>8</b>Registrar una cita</a></li>
+    <li><a href="#s9"><b>9</b>Panel de indicadores</a></li>
+    <li><a href="#s10"><b>10</b>Mensajes frecuentes</a></li>
+  </ol>
+  <p class="parte">Anexo</p>
+  <ol>
+    <li><a href="#s11"><b>11</b>Trazabilidad</a></li>
+    <li><a href="#s12"><b>12</b>Estado de avance</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<div class="parte-div">
+  <span class="rot">Parte I</span>
+  <h2>Manual técnico</h2>
+  <p>Dirigido a quien instala, mantiene o evalúa el sistema. Requiere conocimientos de línea de comandos, bases de datos relacionales y contenedores.</p>
+</div>
+
+<!-- ============ 1 ============ -->
+<section id="s1">
+  <h3><span class="n">01</span>Arquitectura del sistema</h3>
+  <p class="intro">El sistema sigue una arquitectura hexagonal, también llamada de puertos y adaptadores. Su regla central es que las reglas de negocio no dependen de la tecnología que las rodea: el dominio no conoce PostgreSQL, ni WhatsApp, ni el protocolo HTTP.</p>
+
+  <figure>
+    <div class="fig-scroll">
+      <svg viewBox="0 0 900 340" role="img" aria-label="Arquitectura del sistema: los adaptadores de entrada invocan el núcleo, que a su vez invoca los adaptadores de salida hacia PostgreSQL y la mensajería.">
+        <defs>
+          <marker id="fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+
+        <text class="tm" x="14" y="22">ENTRADA</text>
+        <text class="tm" x="336" y="22">NÚCLEO · SIN DEPENDENCIAS DE INFRAESTRUCTURA</text>
+        <text class="tm" x="770" y="22">SALIDA</text>
+
+        <rect class="nb" x="14" y="40" width="160" height="44" rx="3"/>
+        <text class="tb" x="26" y="60">Interfaz web</text>
+        <text class="ta" x="26" y="75">recepción y dirección</text>
+
+        <rect class="nb" x="14" y="104" width="160" height="44" rx="3"/>
+        <text class="tb" x="26" y="124">Controlador HTTP</text>
+        <text class="ta" x="26" y="139">API REST</text>
+
+        <rect class="nb" x="14" y="168" width="160" height="44" rx="3"/>
+        <text class="tb" x="26" y="188">n8n · cron</text>
+        <text class="ta" x="26" y="203">dispara cada minuto</text>
+
+        <rect class="nb" x="14" y="232" width="160" height="44" rx="3"/>
+        <text class="tb" x="26" y="252">n8n · webhook</text>
+        <text class="ta" x="26" y="267">estados de entrega</text>
+
+        <rect class="nc" x="300" y="40" width="300" height="272" rx="4"/>
+
+        <rect x="320" y="62" width="260" height="94" rx="3" fill="none" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 3"/>
+        <text class="tm" x="332" y="80" fill="var(--accent)">CASOS DE USO</text>
+        <text class="t" x="332" y="100">RegistrarCita · ConfirmarCita</text>
+        <text class="t" x="332" y="118">CancelarCita · CerrarAsistencia</text>
+        <text class="t" x="332" y="136">DespacharRecordatorios</text>
+
+        <rect x="320" y="174" width="260" height="94" rx="3" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.2"/>
+        <text class="tm" x="332" y="192" fill="var(--accent)">DOMINIO</text>
+        <text class="t" x="332" y="212">Cita · máquina de estados</text>
+        <text class="t" x="332" y="230">PoliticaRecordatorios</text>
+        <text class="t" x="332" y="248">Reloj · puerto de tiempo</text>
+
+        <text class="ta" x="320" y="292" fill="var(--accent)">Cobertura de pruebas 93,77 % · 0 violaciones de dependencia</text>
+
+        <rect class="nb" x="726" y="40" width="160" height="44" rx="3"/>
+        <text class="tb" x="738" y="60">PostgreSQL</text>
+        <text class="ta" x="738" y="75">datos y restricciones</text>
+
+        <rect class="nb" x="726" y="104" width="160" height="44" rx="3"/>
+        <text class="tb" x="738" y="124">n8n → WhatsApp</text>
+        <text class="ta" x="738" y="139">envío de mensajes</text>
+
+        <rect class="nb" x="726" y="168" width="160" height="44" rx="3"/>
+        <text class="tb" x="738" y="188">Bitácora</text>
+        <text class="ta" x="738" y="203">auditoría inalterable</text>
+
+        <rect class="nb" x="726" y="232" width="160" height="44" rx="3"/>
+        <text class="tb" x="738" y="252">Instrumentación</text>
+        <text class="ta" x="738" y="267">fichas técnicas</text>
+
+        <path class="la" d="M 174 62 L 296 62" marker-end="url(#fl)"/>
+        <path class="la" d="M 174 126 L 296 126" marker-end="url(#fl)"/>
+        <path class="la" d="M 174 190 L 296 190" marker-end="url(#fl)"/>
+        <path class="la" d="M 174 254 L 296 254" marker-end="url(#fl)"/>
+
+        <path class="la" d="M 604 62 L 722 62" marker-end="url(#fl)"/>
+        <path class="la" d="M 604 126 L 722 126" marker-end="url(#fl)"/>
+        <path class="la" d="M 604 190 L 722 190" marker-end="url(#fl)"/>
+        <path class="la" d="M 604 254 L 722 254" marker-end="url(#fl)"/>
+      </svg>
+    </div>
+    <figcaption><b>Figura 1.</b> Los adaptadores de entrada traducen peticiones del mundo exterior a llamadas del núcleo; los de salida implementan lo que el núcleo necesita. Sustituir WhatsApp por otro canal, o PostgreSQL por otro motor, no obliga a tocar el dominio.</figcaption>
+  </figure>
+
+  <h4>Estructura de carpetas</h4>
+  <pre><code>src/
+  domain/            Reglas de negocio · sin dependencias externas
+    Cita.ts            Máquina de estados de la cita
+    PoliticaRecordatorios.ts  Qué recordatorio se envía y cuándo
+    Reloj.ts           Puerto de tiempo
+  infrastructure/
+    db/pool.ts         Conexión a PostgreSQL
+    http/server.ts     API REST
+  ui/                  Interfaz web · sin compilación
+tests/                 Pruebas unitarias del dominio
+db/                    Esquema, datos e indicadores
+n8n/workflows/         Flujos de automatización</code></pre>
+
+  <div class="aviso">
+    <span class="rot">Por qué el reloj es un puerto</span>
+    <p>Toda la lógica del sistema es temporal: cuándo disparar un recordatorio, si una cancelación fue oportuna, si un enlace expiró. Si el dominio llamara directamente a la hora del sistema, esas reglas serían imposibles de probar sin esperar horas reales. Al recibir el reloj como dependencia, las pruebas fijan el instante que necesitan.</p>
+  </div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section id="s2">
+  <h3><span class="n">02</span>Instalación y puesta en marcha</h3>
+  <p class="intro">El sistema corre de forma nativa sobre Node.js y PostgreSQL. Solo la automatización con n8n usa contenedores.</p>
+
+  <h5>Requisitos</h5>
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Componente</th><th>Versión</th><th>Observación</th></tr></thead>
+      <tbody>
+        <tr><td>PostgreSQL</td><td class="m">18.4</td><td>Requiere las extensiones <code>btree_gist</code> y <code>pgcrypto</code></td></tr>
+        <tr><td>Node.js</td><td class="m">26.x</td><td>Ejecuta TypeScript mediante <code>tsx</code>, sin compilación previa</td></tr>
+        <tr><td>Docker</td><td class="m">—</td><td>Solo para n8n</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Preparar la base de datos</h5>
+  <pre><code>psql -U postgres -h localhost -p 5433 -d peru-ruso -f db/schema.sql
+psql -U postgres -h localhost -p 5433 -d peru-ruso -f db/seed.sql</code></pre>
+
+  <h5>Levantar la aplicación</h5>
+  <pre><code>npm install
+npm run start          # producción
+npm run dev            # con recarga automática al guardar</code></pre>
+  <p>Queda disponible en <code>http://localhost:3000</code></p>
+
+  <h5>Levantar la automatización</h5>
+  <pre><code>docker compose up -d
+docker compose logs -f</code></pre>
+  <p>El editor de flujos queda en <code>http://localhost:5678</code></p>
+
+  <h5>Variables de entorno</h5>
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Variable</th><th>Valor por defecto</th><th>Descripción</th></tr></thead>
+      <tbody>
+        <tr><td class="m acc">PGHOST</td><td class="m">localhost</td><td>Servidor de base de datos</td></tr>
+        <tr><td class="m acc">PGPORT</td><td class="m">5433</td><td>Puerto de PostgreSQL</td></tr>
+        <tr><td class="m acc">PGDATABASE</td><td class="m">peru-ruso</td><td>Nombre de la base</td></tr>
+        <tr><td class="m acc">PGUSER</td><td class="m">postgres</td><td>Usuario de conexión</td></tr>
+        <tr><td class="m acc">PGPASSWORD</td><td class="m">—</td><td>Contraseña</td></tr>
+        <tr><td class="m acc">PORT</td><td class="m">3000</td><td>Puerto de la aplicación</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="aviso riesgo">
+    <span class="rot">Antes de publicar el código</span>
+    <p>El archivo <code>src/infrastructure/db/pool.ts</code> conserva valores por defecto de desarrollo, incluida la contraseña. Antes de subir el proyecto a un repositorio público hay que moverlos a un archivo <code>.env</code> excluido del control de versiones.</p>
+  </div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section id="s3">
+  <h3><span class="n">03</span>Modelo de datos</h3>
+  <p class="intro">Quince tablas. El diseño separa deliberadamente lo que ocurre (la cita), lo que el sistema intentó comunicar (el recordatorio) y lo que el paciente decidió (la respuesta), porque las tres cosas se miden por separado en la investigación.</p>
+
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Tabla</th><th>Contenido</th><th>Nota de diseño</th></tr></thead>
+      <tbody>
+        <tr><td class="m acc">cita</td><td>Entidad central de la medición</td><td>Restricción <code>EXCLUDE</code> que impide el solapamiento horario</td></tr>
+        <tr><td class="m acc">paciente</td><td>Datos de contacto y nivel de riesgo</td><td>Incluye un seudónimo estable para la exportación anonimizada</td></tr>
+        <tr><td class="m acc">consentimiento</td><td>Autorizaciones de la Ley N.° 29733</td><td>Versionado, con fecha de otorgamiento y de revocación</td></tr>
+        <tr><td class="m acc">recordatorio</td><td>Cada envío programado</td><td><code>UNIQUE</code> sobre la clave de idempotencia</td></tr>
+        <tr><td class="m acc">respuesta_paciente</td><td>Confirmaciones y cancelaciones</td><td>Guarda el resumen del token, nunca el token en claro</td></tr>
+        <tr><td class="m acc">medico</td><td>Profesionales y su colegiatura</td><td></td></tr>
+        <tr><td class="m acc">horario_atencion</td><td>Franjas de atención por día</td><td>Genera la rejilla de cupos disponibles</td></tr>
+        <tr><td class="m acc">excepcion_agenda</td><td>Feriados y ausencias</td><td></td></tr>
+        <tr><td class="m acc">lista_espera</td><td>Pacientes esperando cupo</td><td></td></tr>
+        <tr><td class="m acc">oferta_cupo</td><td>Cupos liberados y ofrecidos</td><td>Mide la recuperación de citas canceladas</td></tr>
+        <tr><td class="m acc">usuario</td><td>Personal del consultorio</td><td>Roles de recepción, médico y dirección</td></tr>
+        <tr><td class="m acc">auditoria</td><td>Bitácora de accesos a datos personales</td><td>Sin permisos de modificación ni borrado</td></tr>
+        <tr><td class="m acc">medicion_consulta</td><td>Duración de las consultas de lectura</td><td>Instrumentación · Ficha técnica N.° 9</td></tr>
+        <tr><td class="m acc">reporte_generado</td><td>Reportes emitidos</td><td>Instrumentación · Ficha técnica N.° 8</td></tr>
+        <tr><td class="m acc">fase_estudio</td><td>Ventanas de medición</td><td>Separa el antes y el después sin fechas escritas a mano</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>Restricciones que sostienen la integridad</h4>
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Restricción</th><th>Qué impide</th></tr></thead>
+      <tbody>
+        <tr><td class="m">ex_cita_sin_solape</td><td>Dos citas activas del mismo médico en horarios que se cruzan, aun si se guardan al mismo tiempo desde dos computadoras</td></tr>
+        <tr><td class="m">clave_idempotencia</td><td>Que un reintento de la automatización genere un segundo mensaje al mismo paciente</td></tr>
+        <tr><td class="m">tipo_doc + num_doc</td><td>Registrar dos veces al mismo paciente</td></tr>
+        <tr><td class="m">token_hash</td><td>Reutilizar un enlace de confirmación ya usado</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="aviso">
+    <span class="rot">Cómo se libera un cupo</span>
+    <p>La restricción de exclusión ignora los estados <code>CANCELADA</code> y <code>REPROGRAMADA</code>. Eso significa que al cancelar una cita, el motor de base de datos deja el horario disponible de inmediato y otro paciente puede tomarlo. En cambio, una cita marcada como <code>AUSENTE</code> sigue bloqueando el horario, porque el médico igual perdió esa hora.</p>
+  </div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section id="s4">
+  <h3><span class="n">04</span>Interfaz de programación</h3>
+  <p class="intro">Todas las rutas devuelven y reciben JSON. Los errores llegan con el código HTTP correspondiente y un cuerpo con la clave <code>error</code>.</p>
+
+  <h5>Agenda y citas</h5>
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Ruta</th><th>Descripción</th></tr></thead>
+      <tbody>
+        <tr><td class="m"><span class="verbo v-get">GET</span> /api/agenda</td><td>Citas de una fecha con estado, recordatorios enviados y respuesta del paciente</td></tr>
+        <tr><td class="m"><span class="verbo v-get">GET</span> /api/cupos</td><td>Horarios realmente libres de un médico en una fecha</td></tr>
+        <tr><td class="m"><span class="verbo v-post">POST</span> /api/citas</td><td>Registra una cita y programa su secuencia de recordatorios</td></tr>
+        <tr><td class="m"><span class="verbo v-post">POST</span> /api/citas/:id/confirmar</td><td>Marca la cita como confirmada y suspende los recordatorios previos</td></tr>
+        <tr><td class="m"><span class="verbo v-post">POST</span> /api/citas/:id/cancelar</td><td>Cancela, calcula la antelación e indica si el cupo es reasignable</td></tr>
+        <tr><td class="m"><span class="verbo v-post">POST</span> /api/citas/:id/cerrar</td><td>Cierre del día: registra asistencia o inasistencia</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Consultas de apoyo</h5>
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Ruta</th><th>Descripción</th></tr></thead>
+      <tbody>
+        <tr><td class="m"><span class="verbo v-get">GET</span> /api/pacientes</td><td>Búsqueda por documento o nombre</td></tr>
+        <tr><td class="m"><span class="verbo v-get">GET</span> /api/medicos</td><td>Profesionales activos</td></tr>
+        <tr><td class="m"><span class="verbo v-get">GET</span> /api/indicadores</td><td>Indicadores de las fichas técnicas, separados por fase</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Automatización · consumidas por n8n</h5>
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Ruta</th><th>Descripción</th></tr></thead>
+      <tbody>
+        <tr><td class="m"><span class="verbo v-post">POST</span> /api/recordatorios/pendientes</td><td>Entrega los recordatorios vencidos y los reserva de forma atómica</td></tr>
+        <tr><td class="m"><span class="verbo v-post">POST</span> /api/recordatorios/:id/resultado</td><td>Informa si el envío tuvo éxito</td></tr>
+        <tr><td class="m"><span class="verbo v-post">POST</span> /api/webhooks/whatsapp</td><td>Recibe los estados de entrega y lectura</td></tr>
+        <tr><td class="m"><span class="verbo v-get">GET</span> /api/recordatorios/estado</td><td>Resumen de la cola por estado</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>Ejemplo · registrar una cita</h4>
+  <pre><code>POST /api/citas
+{
+  "paciente_id": 12,
+  "medico_id": 2,
+  "inicio": "2026-11-18T16:00:00.000Z",
+  "registro_seg": 47
+}
+
+201 Created
+{ "id": 724, "recordatorios": 3 }</code></pre>
+
+  <p>Si el horario ya está ocupado, la respuesta es <code>409</code> con el mensaje «Ese horario ya está ocupado para el médico seleccionado».</p>
+</section>
+
+<!-- ============ 5 ============ -->
+<section id="s5">
+  <h3><span class="n">05</span>Motor de recordatorios</h3>
+  <p class="intro">La automatización se apoya en n8n, tal como plantea el marco teórico de la investigación. El reparto de responsabilidades es deliberado: n8n orquesta y envía, la aplicación decide qué corresponde enviar y registra los estados.</p>
+
+  <h4>Secuencia de contacto</h4>
+  <p>Al registrarse una cita, el dominio programa tres recordatorios: <strong>48 horas antes</strong>, <strong>24 horas antes</strong> y <strong>3 horas antes</strong>. Los hitos ya vencidos no se programan. Si una cita se registra para dentro de un día, el recordatorio de 48 horas simplemente no aplica; sin esta regla, el paciente recibiría los tres mensajes de golpe.</p>
+
+  <p>Cuando el paciente confirma, se suspenden los recordatorios de 48 y 24 horas pero se conserva el de 3 horas, porque su función deja de ser pedir confirmación y pasa a ser evitar el olvido el mismo día. Al cancelar o reprogramar se suspende la secuencia completa.</p>
+
+  <h4>Garantías del despacho</h4>
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Riesgo</th><th>Mecanismo que lo impide</th></tr></thead>
+      <tbody>
+        <tr><td>Dos ejecuciones simultáneas toman el mismo recordatorio</td><td>Reserva con bloqueo que omite las filas ya tomadas</td></tr>
+        <tr><td>Un reintento genera un segundo mensaje</td><td>Restricción de unicidad sobre la clave de idempotencia</td></tr>
+        <tr><td>Se informa dos veces el mismo resultado</td><td>La actualización exige que el recordatorio esté reservado; si no, responde <code>409</code></td></tr>
+        <tr><td>Se contacta a quien revocó su consentimiento</td><td>La consulta exige consentimiento vigente antes de entregar el recordatorio</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="aviso ojo">
+    <span class="rot">El envío está simulado</span>
+    <p>El nodo de WhatsApp registra el mensaje en lugar de enviarlo, porque Meta todavía no aprueba las plantillas de la cuenta. Al aprobarse, se reemplaza ese único nodo por una llamada a la interfaz de WhatsApp Business y el resto del flujo queda igual.</p>
+    <p>El trámite de verificación de empresa y aprobación de plantillas toma entre una y tres semanas, y bloquea toda prueba de extremo a extremo con pacientes reales.</p>
+  </div>
+
+  <h4>Contenido del mensaje</h4>
+  <p>Por exigencia de la Ley N.° 29733 sobre datos sensibles de salud, el mensaje contiene únicamente fecha, hora, profesional y sede. Nunca diagnóstico, motivo de consulta ni especialidad.</p>
+
+  <h5>Reimportar el flujo</h5>
+  <pre><code>docker exec peruruso-n8n n8n import:workflow \
+  --input=/workflows/despacho-recordatorios.json
+docker exec peruruso-n8n n8n publish:workflow --id=despachoRecord01
+docker compose restart n8n</code></pre>
+</section>
+
+<!-- ============ 6 ============ -->
+<section id="s6">
+  <h3><span class="n">06</span>Pruebas y verificación</h3>
+  <p class="intro">El sistema incorpora tres verificaciones automatizadas cuyos resultados sirven como evidencia de calidad para el capítulo de resultados de la investigación.</p>
+
+  <h5>Pruebas del dominio</h5>
+  <pre><code>npm test          # 43 pruebas
+npm run test:cov  # informe de cobertura</code></pre>
+  <p>Cobertura alcanzada: <strong>93,77 %</strong> en las capas de dominio y aplicación, sobre un umbral exigido del 85 %.</p>
+
+  <h5>Regla de arquitectura</h5>
+  <pre><code>npm run arq:verificar</code></pre>
+  <p>Verifica que ningún archivo del dominio importe infraestructura y que no existan dependencias circulares. Resultado actual: <strong>sin violaciones</strong>.</p>
+
+  <h5>Restricciones de la base de datos</h5>
+  <pre><code>psql -U postgres -h localhost -p 5433 -d peru-ruso \
+  -f db/verificar_restricciones.sql</code></pre>
+  <p>Ejecuta diez casos que intentan violar las reglas de integridad. Todos se comportan según lo esperado. La transacción termina en reversión, de modo que la base no queda alterada.</p>
+
+  <div class="aviso">
+    <span class="rot">Para el capítulo de resultados</span>
+    <p>Estas tres salidas son evidencia empírica citable. Conviene además cronometrar la sustitución del nodo de envío simulado por el envío real: registrar cuántos archivos se tocaron y cuántas pruebas se rompieron demuestra con números la mantenibilidad que la arquitectura promete.</p>
+  </div>
+</section>
+
+<div class="parte-div">
+  <span class="rot">Parte II</span>
+  <h2>Manual de usuario</h2>
+  <p>Dirigido al personal de recepción, a los médicos y a la dirección del consultorio. No requiere conocimientos técnicos.</p>
+</div>
+
+<!-- ============ 7 ============ -->
+<section id="s7">
+  <h3><span class="n">07</span>Agenda del día</h3>
+  <p class="intro">Es la pantalla principal de recepción y la que se consulta durante toda la jornada. Muestra las citas de la fecha seleccionada con su estado actual.</p>
+
+  <h4>Qué significa cada estado</h4>
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Estado</th><th>Significado</th><th>Qué hacer</th></tr></thead>
+      <tbody>
+        <tr><td class="m">PROGRAMADA</td><td>La cita está registrada y el paciente aún no responde</td><td>Esperar; el sistema le escribirá automáticamente</td></tr>
+        <tr><td class="m">CONFIRMADA</td><td>El paciente avisó que asistirá</td><td>Nada; se atiende con normalidad</td></tr>
+        <tr><td class="m">ATENDIDA</td><td>El paciente vino a su cita</td><td>Ya está cerrada</td></tr>
+        <tr><td class="m">AUSENTE</td><td>No vino ni avisó</td><td>Ya está cerrada; el sistema la cuenta como inasistencia</td></tr>
+        <tr><td class="m">CANCELADA</td><td>Avisó que no podía venir</td><td>El horario queda libre para otro paciente</td></tr>
+        <tr><td class="m">REPROGRAMADA</td><td>Se movió a otra fecha</td><td>Existe una cita nueva vinculada a esta</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>La columna de recordatorios</h4>
+  <p>Indica cuántos mensajes se enviaron al paciente y cuántos quedan por enviar. Si aparecen cero enviados y cero pendientes, es porque la cita se registró con muy poca antelación y ya no había tiempo para ningún aviso.</p>
+
+  <h4>Cerrar el día</h4>
+  <p>Al terminar la jornada hay que marcar cada cita como <strong>Atendió</strong> o <strong>No asistió</strong>. Este paso es el que alimenta la medición del ausentismo: una cita que queda sin cerrar no se cuenta en ninguna de las dos categorías y distorsiona los indicadores.</p>
+
+  <div class="aviso riesgo">
+    <span class="rot">Cancelar no es lo mismo que marcar ausente</span>
+    <p>Si el paciente avisa que no podrá venir, corresponde <strong>Cancelar</strong>, aunque avise sobre la hora. Si no avisó y no vino, corresponde <strong>No asistió</strong>.</p>
+    <p>La diferencia importa: una cancelación libera el horario para otro paciente y no cuenta como inasistencia. Marcar como ausente a alguien que sí avisó eleva artificialmente la tasa de ausentismo del consultorio.</p>
+  </div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section id="s8">
+  <h3><span class="n">08</span>Registrar una cita</h3>
+  <p class="intro">El registro completo toma menos de un minuto. El sistema solo ofrece horarios realmente disponibles, de modo que no es posible reservar sobre una cita existente.</p>
+
+  <ol class="pasos">
+    <li><b>Buscar al paciente</b>Escribí al menos dos caracteres del documento o del nombre. Las coincidencias aparecen debajo del campo; hacé clic en la correcta.</li>
+    <li><b>Elegir al médico</b>La lista muestra los profesionales activos del consultorio.</li>
+    <li><b>Elegir la fecha</b>Al seleccionarla, el sistema calcula y muestra los horarios libres de ese médico ese día.</li>
+    <li><b>Elegir el horario</b>Solo aparecen los cupos disponibles. Los ya ocupados no se muestran.</li>
+    <li><b>Registrar</b>El botón se habilita cuando el paciente y el horario están elegidos. Al confirmar, el sistema informa cuántos recordatorios quedaron programados.</li>
+  </ol>
+
+  <h4>Si no aparecen horarios</h4>
+  <p>Puede deberse a tres razones: el médico no atiende ese día de la semana, la fecha está marcada como excepción por feriado o ausencia, o la agenda está completa.</p>
+
+  <div class="aviso">
+    <span class="rot">Sobre el cronómetro</span>
+    <p>La pantalla muestra el tiempo transcurrido desde que se abrió el formulario. No es una cuenta regresiva ni hay límite: el dato se registra para medir cuánto se agilizó el proceso respecto del método manual, que es uno de los indicadores de la investigación.</p>
+  </div>
+</section>
+
+<!-- ============ 9 ============ -->
+<section id="s9">
+  <h3><span class="n">09</span>Panel de indicadores</h3>
+  <p class="intro">Compara el periodo anterior a la implementación del sistema con el periodo posterior. Es la pantalla que sustenta los resultados de la investigación.</p>
+
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Indicador</th><th>Qué mide</th><th>Ficha</th></tr></thead>
+      <tbody>
+        <tr><td>Tasa de ausentismo</td><td>Porcentaje de citas a las que el paciente no asistió sin avisar</td><td class="m acc">N.° 10</td></tr>
+        <tr><td>Reducción absoluta</td><td>Puntos porcentuales de diferencia entre ambos periodos</td><td class="m acc">Objetivo general</td></tr>
+        <tr><td>Recordatorios entregados</td><td>Porcentaje de mensajes que llegaron al paciente</td><td class="m acc">N.° 4</td></tr>
+        <tr><td>Citas confirmadas</td><td>Porcentaje de pacientes que respondieron al recordatorio</td><td class="m acc">N.° 5</td></tr>
+        <tr><td>Cupos recuperados</td><td>Cancelaciones que se reasignaron a otro paciente</td><td class="m acc">N.° 14</td></tr>
+        <tr><td>Tiempo de consulta</td><td>Segundos promedio para obtener información del sistema</td><td class="m acc">N.° 9</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="aviso riesgo">
+    <span class="rot">Las ventanas de medición hay que configurarlas</span>
+    <p>Los datos cargados actualmente son de demostración y sus periodos son ficticios. Al iniciar la operación real hay que fijar las ventanas verdaderas del estudio en la tabla <code>fase_estudio</code>, o el panel comparará periodos equivocados.</p>
+  </div>
+</section>
+
+<!-- ============ 10 ============ -->
+<section id="s10">
+  <h3><span class="n">10</span>Mensajes frecuentes</h3>
+  <p class="intro">Qué significan y cómo resolverlos.</p>
+
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Mensaje</th><th>Causa</th><th>Solución</th></tr></thead>
+      <tbody>
+        <tr><td>Ese horario ya está ocupado para el médico seleccionado</td><td>Otra persona reservó ese cupo mientras completabas el formulario</td><td>Elegí otro horario de la lista, que ya se actualizó</td></tr>
+        <tr><td>No se puede confirmar una cita cuya hora ya pasó</td><td>Se intentó confirmar una cita vencida</td><td>Corresponde cerrarla como atendida o ausente</td></tr>
+        <tr><td>No se puede cancelar una cita cuya hora ya pasó</td><td>El paciente avisó después del horario</td><td>Marcala como ausente</td></tr>
+        <tr><td>No se puede marcar como ausente una cita que aún no ha terminado</td><td>Se intentó cerrar antes de que terminara la consulta</td><td>Esperá a que pase la hora de la cita</td></tr>
+        <tr><td>No hay cupos libres</td><td>El médico no atiende ese día, está de licencia o la agenda está llena</td><td>Probá otra fecha u otro profesional</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="parte-div">
+  <span class="rot">Anexo</span>
+  <h2>Trazabilidad y estado</h2>
+  <p>Correspondencia entre lo construido y los instrumentos de la investigación.</p>
+</div>
+
+<!-- ============ 11 ============ -->
+<section id="s11">
+  <h3><span class="n">11</span>Trazabilidad de los indicadores</h3>
+  <p class="intro">Cada ficha técnica del anexo metodológico tiene su origen identificado en el sistema. Las tres últimas dependen de instrumentación construida específicamente para la investigación, que un sistema de citas convencional no registraría.</p>
+
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Ficha</th><th>Indicador</th><th>Origen en el sistema</th></tr></thead>
+      <tbody>
+        <tr><td class="m acc">N.° 1</td><td>Tiempo promedio de registro de una cita</td><td class="m">cita.registro_seg</td></tr>
+        <tr><td class="m acc">N.° 2</td><td>Número de citas registradas</td><td class="m">cita</td></tr>
+        <tr><td class="m acc">N.° 3</td><td>Número de recordatorios enviados</td><td class="m">recordatorio.estado</td></tr>
+        <tr><td class="m acc">N.° 4</td><td>Porcentaje de recordatorios enviados</td><td class="m">recordatorio.estado</td></tr>
+        <tr><td class="m acc">N.° 5</td><td>Porcentaje de citas confirmadas</td><td class="m">respuesta_paciente.accion</td></tr>
+        <tr><td class="m acc">N.° 6</td><td>Número de citas reprogramadas</td><td class="m">cita.estado</td></tr>
+        <tr><td class="m acc">N.° 7</td><td>Número de cancelaciones oportunas</td><td class="m">cita.antelacion_horas</td></tr>
+        <tr><td class="m acc">N.° 8</td><td>Número de reportes generados</td><td class="m">reporte_generado</td></tr>
+        <tr><td class="m acc">N.° 9</td><td>Tiempo de consulta de información</td><td class="m">medicion_consulta</td></tr>
+        <tr><td class="m acc">N.° 10</td><td>Tasa de ausentismo</td><td class="m">cita.estado = AUSENTE</td></tr>
+        <tr><td class="m acc">N.° 11</td><td>Porcentaje de asistencia</td><td class="m">cita.estado = ATENDIDA</td></tr>
+        <tr><td class="m acc">N.° 12</td><td>Número de citas perdidas</td><td class="m">cita.estado = AUSENTE</td></tr>
+        <tr><td class="m acc">N.° 13</td><td>Tiempo promedio de reprogramación</td><td class="m">cita.cita_origen_id</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Todas las consultas están reunidas en <code>db/indicadores.sql</code>, una por ficha, más una exportación anonimizada lista para el análisis estadístico.</p>
+</section>
+
+<!-- ============ 12 ============ -->
+<section id="s12">
+  <h3><span class="n">12</span>Estado de avance</h3>
+  <p class="intro">Qué está construido y verificado, y qué falta. Declararlo con precisión evita prometer más de lo entregado.</p>
+
+  <h5>Construido y verificado</h5>
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Componente</th><th>Verificación</th></tr></thead>
+      <tbody>
+        <tr><td>Modelo de datos</td><td>Ejecutado contra PostgreSQL 18.4 · 10 pruebas de restricciones</td></tr>
+        <tr><td>Máquina de estados de la cita</td><td>43 pruebas unitarias · 93,77 % de cobertura</td></tr>
+        <tr><td>Programación de recordatorios</td><td>Probada con reloj controlado</td></tr>
+        <tr><td>Agenda, registro y cierre del día</td><td>Probado en navegador de extremo a extremo</td></tr>
+        <tr><td>Panel de indicadores</td><td>Contrastado con consultas directas a la base</td></tr>
+        <tr><td>Despacho automático con n8n</td><td>Ejecutado en vivo: el cron despachó y registró el envío</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Pendiente</h5>
+  <ul>
+    <li>Página de confirmación del paciente mediante enlace único, que es lo que cierra el circuito: hoy el mensaje sale pero el paciente todavía no puede responder desde ahí</li>
+    <li>Lista de espera y reasignación automática de los cupos liberados</li>
+    <li>Autenticación y control de acceso por rol</li>
+    <li>Extracción de los casos de uso desde el controlador HTTP hacia la capa de aplicación</li>
+    <li>Verificación de empresa ante Meta y aprobación de las plantillas de WhatsApp</li>
+  </ul>
+
+  <div class="aviso ojo">
+    <span class="rot">Sobre los datos cargados</span>
+    <p>La base contiene datos sintéticos generados para demostrar el sistema y validar las consultas de indicadores. No son resultados de investigación. Las cifras del capítulo correspondiente deben provenir de los registros reales del consultorio.</p>
+  </div>
+</section>
+
+</main>
+</div>

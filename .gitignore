@@ -1,0 +1,19 @@
+# Dependencias. Se reinstalan con `npm install`; no van al repositorio.
+node_modules/
+
+# Secretos. NUNCA se versionan: claves de API, contraseñas, claves de servicio.
+# El archivo de ejemplo (.env.ejemplo) sí se versiona, porque no contiene
+# ningún valor real y documenta qué variables hacen falta.
+.env
+.env.*
+!.env.ejemplo
+
+# Salidas generadas
+coverage/
+evaluacion/resultados.json
+*.log
+
+# Copias de trabajo que crean las herramientas de asistencia. Contienen el
+# repositorio entero duplicado; si se versionaran, cada archivo aparecería
+# dos veces y los conteos de pruebas saldrían multiplicados.
+.claude/worktrees/

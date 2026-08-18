@@ -1,0 +1,48 @@
+# =====================================================================
+# n8n — plataforma de automatización de flujos de trabajo
+# Consultorio Perú Ruso · Lima, 2026
+#
+# n8n orquesta: dispara el cron y envía los mensajes.
+# La aplicación (que corre nativa en el host, puerto 3000) es dueña de
+# los datos, los estados de la cita y el cálculo de los indicadores.
+#
+#   docker compose up -d      levantar
+#   docker compose logs -f    ver la actividad
+#   docker compose down       detener (los flujos se conservan en el volumen)
+# =====================================================================
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: peruruso-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      # Zona horaria de Lima: los cron se programan en hora local
+      GENERIC_TIMEZONE: America/Lima
+      TZ: America/Lima
+
+      # Acceso por HTTP en localhost (sin TLS en desarrollo)
+      N8N_SECURE_COOKIE: "false"
+      N8N_HOST: localhost
+      N8N_PORT: "5678"
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://localhost:5678/
+
+      # URL de la aplicación vista desde dentro del contenedor.
+      # En Docker Desktop (Windows y Mac) host.docker.internal apunta al host.
+      API_BASE: http://host.docker.internal:3000
+
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_RUNNERS_ENABLED: "true"
+      N8N_LOG_LEVEL: info
+    volumes:
+      - n8n-data:/home/node/.n8n
+      - ./n8n/workflows:/workflows:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  n8n-data:
+    name: peruruso-n8n-data

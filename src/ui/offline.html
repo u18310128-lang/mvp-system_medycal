@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sin conexión — Consultorio Perú Ruso</title>
+<link rel="stylesheet" href="/styles.css">
+<style>
+  body { display: grid; place-items: center; min-height: 100vh; padding: 24px; }
+  .aviso { max-width: 430px; text-align: center; }
+  .aviso .mark { margin: 0 auto 22px; width: 52px; height: 52px; font-size: 17px; }
+  .aviso h1 { margin: 0 0 10px; font-size: 22px; font-weight: 650; }
+  .aviso p { margin: 0 0 22px; font-size: 14.5px; color: var(--ink-2); line-height: 1.6; }
+  .aviso .porque {
+    font-size: 13px;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+    margin-top: 26px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="aviso">
+  <span class="mark">PR</span>
+  <h1>Sin conexión</h1>
+  <p>
+    No se puede llegar al servidor del consultorio. Revisá la red y volvé a
+    intentar.
+  </p>
+  <button class="btn" onclick="location.reload()">Reintentar</button>
+
+  <p class="porque">
+    La aplicación queda instalada, pero la agenda no se guarda para uso sin
+    conexión a propósito: mostrar las citas de ayer como si fueran las de hoy
+    llevaría a atender al paciente equivocado.
+  </p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consultorio Perú Ruso — Gestión de citas</title>
+<link rel="stylesheet" href="/styles.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icono-192.png">
+<meta name="theme-color" content="#0E5D50">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Perú Ruso">
+<script>
+  // Antes de pintar, para que no haya destello de tema claro.
+  const temaGuardado = localStorage.getItem("tema");
+  if (temaGuardado) document.documentElement.dataset.tema = temaGuardado;
+</script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- =============== panel lateral =============== -->
+  <aside class="lateral">
+    <div class="brand">
+      <span class="mark">PR</span>
+      <div>
+        <h1>Consultorio Perú Ruso</h1>
+        <p>Gestión de citas</p>
+      </div>
+    </div>
+
+    <nav class="tabs">
+      <span class="rotulo">Operación</span>
+
+      <button class="tab" data-vista="consulta" data-alcance="PROPIA" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/>
+        </svg>
+        Mi consulta
+      </button>
+
+      <button class="tab activo" data-vista="agenda" data-alcance="COMPLETA">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/>
+        </svg>
+        Agenda del día
+      </button>
+
+      <button class="tab" data-vista="registrar" data-requiere="REGISTRAR_CITA" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        Registrar cita
+      </button>
+
+      <button class="tab" data-vista="indicadores" data-requiere="VER_INDICADORES" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>
+        </svg>
+        Indicadores
+      </button>
+
+      <button class="tab" data-vista="conversaciones" data-requiere="VER_CONVERSACIONES" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/>
+        </svg>
+        Conversaciones
+      </button>
+
+      <button class="tab" data-vista="horarios" data-requiere="GESTIONAR_HORARIOS" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>
+        </svg>
+        Horarios
+      </button>
+
+      <button class="tab" data-vista="usuarios" data-requiere="GESTIONAR_USUARIOS" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M17 8.5h5M19.5 6v5"/>
+        </svg>
+        Usuarios
+      </button>
+    </nav>
+
+  </aside>
+
+  <!-- =============== contenido =============== -->
+  <div class="contenido">
+
+    <header class="cabecera">
+      <div class="cabecera-texto">
+        <h2 id="titulo-vista">Agenda del día</h2>
+        <p id="bajada-vista">Citas de la fecha con su estado y sus recordatorios.</p>
+      </div>
+
+      <div id="barra-sesion" class="sesion" hidden>
+        <div class="quien">
+          <span class="avatar" id="sesion-inicial" aria-hidden="true"></span>
+          <div class="quien-datos">
+            <span id="sesion-nombre"></span>
+            <span id="sesion-rol" class="rol-chip"></span>
+          </div>
+        </div>
+        <div class="sesion-acciones">
+          <button id="btn-tema" class="tema" title="Cambiar tema" aria-label="Cambiar tema">◐</button>
+          <button id="btn-salir" class="salir">Salir</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- =============== MI CONSULTA (médico) =============== -->
+      <section id="vista-consulta" class="vista">
+
+        <div class="herramientas">
+          <div class="nav-fecha">
+            <button class="paso" id="c-dia-anterior" aria-label="Día anterior">‹</button>
+            <div class="centro">
+              <span class="dia" id="c-dia-rotulo"></span>
+              <input type="date" id="c-fecha" aria-label="Elegir fecha">
+            </div>
+            <button class="paso" id="c-dia-siguiente" aria-label="Día siguiente">›</button>
+          </div>
+          <button id="c-btn-hoy" class="btn-sec">Hoy</button>
+        </div>
+
+        <div class="consulta-cabecera">
+          <div class="proximo" id="proximo-paciente"></div>
+          <div class="consulta-cifras" id="consulta-cifras"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Pacientes del día</h2>
+          <p class="sub">En orden de atención. Solo aparecen los tuyos.</p>
+          <ol class="linea-tiempo" id="linea-consulta"></ol>
+          <p class="vacio" id="consulta-vacia" hidden>No tenés pacientes citados para esta fecha.</p>
+        </div>
+      </section>
+
+      <!-- =============== AGENDA =============== -->
+      <section id="vista-agenda" class="vista activa">
+
+        <div class="herramientas">
+          <div class="nav-fecha">
+            <button class="paso" id="dia-anterior" aria-label="Día anterior">‹</button>
+            <div class="centro">
+              <span class="dia" id="dia-rotulo"></span>
+              <input type="date" id="fecha" aria-label="Elegir fecha">
+            </div>
+            <button class="paso" id="dia-siguiente" aria-label="Día siguiente">›</button>
+          </div>
+
+          <button id="btn-hoy" class="btn-sec">Hoy</button>
+
+          <div class="buscador">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+            </svg>
+            <input type="text" id="filtro-tabla" placeholder="Filtrar tabla" autocomplete="off">
+          </div>
+
+          <button id="btn-exportar" class="btn" data-requiere="EXPORTAR_DATOS" hidden>Exportar</button>
+        </div>
+
+        <div class="tablero">
+          <div class="tablero-cifra">
+            <span class="rot">Respuesta del paciente</span>
+            <span class="detalle" id="tablero-detalle">—</span>
+            <span class="porcentaje" id="tablero-porcentaje">—</span>
+          </div>
+          <div class="tablero-desglose" id="tablero-desglose"></div>
+        </div>
+
+        <div class="resumen" id="resumen-agenda"></div>
+
+        <div class="tabla-wrap">
+          <table id="tabla-agenda">
+            <thead>
+              <tr>
+                <th>Hora</th>
+                <th>¿Confirma?</th>
+                <th>Paciente</th>
+                <th>Documento</th>
+                <th>Médico</th>
+                <th>Estado</th>
+                <th>Recordatorios</th>
+                <th class="der">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-agenda"></tbody>
+          </table>
+          <p class="vacio" id="agenda-vacia" hidden>No hay citas programadas para esta fecha.</p>
+          <div class="pie-tabla" id="pie-tabla" hidden>
+            <span id="pie-conteo"></span>
+            <span id="pie-nota"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- =============== REGISTRAR =============== -->
+      <section id="vista-registrar" class="vista">
+        <div class="form-grid">
+          <div class="panel">
+            <h2>Nueva cita</h2>
+            <p class="sub">Solo se ofrecen los cupos que el médico tiene realmente libres.</p>
+
+            <div class="campo">
+              <label for="buscar-paciente">Paciente</label>
+              <input type="text" id="buscar-paciente" placeholder="DNI o nombre" autocomplete="off">
+              <div id="sugerencias" class="sugerencias" hidden></div>
+              <div id="paciente-elegido" class="elegido" hidden></div>
+            </div>
+
+            <div class="campo">
+              <label for="sel-medico">Médico</label>
+              <select id="sel-medico"></select>
+            </div>
+
+            <div class="campo">
+              <label for="fecha-cita">Fecha</label>
+              <input type="date" id="fecha-cita">
+            </div>
+
+            <div class="campo">
+              <label>Horario disponible</label>
+              <div id="cupos" class="cupos"><p class="hint">Elegí médico y fecha para ver los cupos libres.</p></div>
+            </div>
+
+            <button id="btn-guardar" class="btn" disabled>Registrar cita</button>
+            <p id="msg-registro" class="msg" hidden></p>
+          </div>
+
+          <aside class="panel info">
+            <h3>Qué ocurre al registrar</h3>
+            <ol class="pasos">
+              <li>La cita se guarda en estado <b>PROGRAMADA</b>.</li>
+              <li>El sistema programa la secuencia de recordatorios en <b>T-48 h</b>, <b>T-24 h</b> y <b>T-3 h</b>.</li>
+              <li>Los hitos ya vencidos se omiten: si la cita es para mañana, no se envía el de 48 horas.</li>
+              <li>El motor rechaza el horario si el médico ya lo tiene ocupado.</li>
+            </ol>
+            <div class="nota">
+              <b>Instrumentación activa.</b> El tiempo que tomás en completar este formulario se registra
+              para la Ficha técnica N.° 1 — tiempo promedio de registro de una cita.
+              <span id="cronometro" class="crono">0 s</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- =============== INDICADORES =============== -->
+      <section id="vista-indicadores" class="vista">
+        <div id="ventanas" class="ventanas"></div>
+
+        <div class="kpis" id="kpis"></div>
+
+        <div class="panel">
+          <h2>Tasa de ausentismo por fase</h2>
+          <p class="sub">Ficha técnica N.° 10 · (Ausentes ÷ Programadas) × 100</p>
+          <div id="grafico" class="grafico"></div>
+        </div>
+
+        <div class="tabla-wrap">
+          <table id="tabla-fases">
+            <thead>
+              <tr>
+                <th>Fase</th>
+                <th class="num">Programadas</th>
+                <th class="num">Atendidas</th>
+                <th class="num">Ausentes</th>
+                <th class="num">Canceladas</th>
+                <th class="num">Tasa ausentismo</th>
+                <th class="num">Asistencia</th>
+                <th class="num">Min. registro</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-fases"></tbody>
+          </table>
+        </div>
+
+        <p class="pie">Datos de demostración. Las cifras del capítulo de resultados provienen de los registros reales del consultorio.</p>
+      </section>
+
+      <!-- =============== CONVERSACIONES =============== -->
+      <section id="vista-conversaciones" class="vista">
+
+        <div class="chat-layout">
+
+          <aside class="panel lista-hilos">
+            <h3>Hilos</h3>
+            <div class="buscador chat-buscador">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+              </svg>
+              <input type="text" id="filtro-hilos" placeholder="Paciente o número" autocomplete="off">
+            </div>
+            <ul class="hilos" id="hilos"></ul>
+          </aside>
+
+          <div class="panel chat-centro">
+            <div id="chat-encabezado" class="chat-encabezado"></div>
+            <div class="hilo-mensajes" id="hilo-mensajes">
+              <p class="hint">Elegí una conversación de la izquierda.</p>
+            </div>
+          </div>
+
+          <aside class="chat-derecha">
+            <div class="panel">
+              <h3>Datos del hilo</h3>
+              <dl class="ficha" id="chat-datos"></dl>
+            </div>
+
+            <div class="panel">
+              <h3>Traza del agente</h3>
+              <p class="sub">Qué entendió y qué hizo en cada turno.</p>
+              <div id="chat-traza"></div>
+            </div>
+
+            <div class="panel">
+              <h3>Citas del paciente</h3>
+              <div id="chat-citas"></div>
+            </div>
+          </aside>
+
+        </div>
+      </section>
+
+      <!-- =============== HORARIOS =============== -->
+      <section id="vista-horarios" class="vista">
+
+        <div class="herramientas" id="selector-medico" hidden>
+          <div class="campo">
+            <label for="h-medico">Profesional</label>
+            <select id="h-medico"></select>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="panel">
+            <h2>Semana de atención</h2>
+            <p class="sub" id="h-subtitulo">Los cupos que ofrece el sistema salen de estos bloques.</p>
+            <div class="semana" id="h-semana"></div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <h3>Agregar bloque</h3>
+              <form id="form-bloque">
+                <div class="campo">
+                  <label for="h-dia">Día</label>
+                  <select id="h-dia">
+                    <option value="1">Lunes</option>
+                    <option value="2">Martes</option>
+                    <option value="3">Miércoles</option>
+                    <option value="4">Jueves</option>
+                    <option value="5">Viernes</option>
+                    <option value="6">Sábado</option>
+                    <option value="7">Domingo</option>
+                  </select>
+                </div>
+                <div class="par">
+                  <div class="campo">
+                    <label for="h-desde">Desde</label>
+                    <input type="time" id="h-desde" value="08:00" required>
+                  </div>
+                  <div class="campo">
+                    <label for="h-hasta">Hasta</label>
+                    <input type="time" id="h-hasta" value="13:00" required>
+                  </div>
+                </div>
+                <div class="campo">
+                  <label for="h-duracion">Duración de cada cita (minutos)</label>
+                  <input type="number" id="h-duracion" value="20" min="5" max="120" step="5">
+                </div>
+                <button type="submit" class="btn">Agregar bloque</button>
+                <p id="h-msg" class="msg" hidden></p>
+              </form>
+            </div>
+
+            <div class="panel">
+              <h3>Registrar ausencia</h3>
+              <p class="sub">Un día o un tramo en que no vas a atender.</p>
+              <form id="form-ausencia">
+                <div class="campo">
+                  <label for="a-fecha">Fecha</label>
+                  <input type="date" id="a-fecha" required>
+                </div>
+                <label class="casilla">
+                  <input type="checkbox" id="a-todo-el-dia" checked>
+                  <span>Todo el día</span>
+                </label>
+                <div class="par" id="a-tramo" hidden>
+                  <div class="campo">
+                    <label for="a-desde">Desde</label>
+                    <input type="time" id="a-desde" value="08:00">
+                  </div>
+                  <div class="campo">
+                    <label for="a-hasta">Hasta</label>
+                    <input type="time" id="a-hasta" value="13:00">
+                  </div>
+                </div>
+                <div class="campo">
+                  <label for="a-motivo">Motivo</label>
+                  <input type="text" id="a-motivo" placeholder="Congreso, licencia, capacitación…" required>
+                </div>
+                <button type="submit" class="btn">Registrar ausencia</button>
+                <p id="a-msg" class="msg" hidden></p>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Ausencias registradas</h2>
+          <p class="sub">Solo se listan las de hoy en adelante.</p>
+          <ul class="ausencias" id="h-ausencias"></ul>
+        </div>
+      </section>
+
+      <!-- =============== USUARIOS =============== -->
+      <section id="vista-usuarios" class="vista">
+
+        <div class="herramientas">
+          <button id="btn-nuevo-usuario" class="btn">Nueva cuenta</button>
+        </div>
+
+        <div class="panel" id="panel-nuevo-usuario" hidden>
+          <h3>Nueva cuenta</h3>
+          <form id="form-usuario">
+            <div class="par">
+              <div class="campo">
+                <label for="u-nombres">Nombre</label>
+                <input type="text" id="u-nombres" required>
+              </div>
+              <div class="campo">
+                <label for="u-email">Correo</label>
+                <input type="email" id="u-email" placeholder="nombre@peruruso.pe" required>
+              </div>
+            </div>
+            <div class="campo">
+              <label for="u-rol">Rol</label>
+              <select id="u-rol">
+                <option value="RECEPCIONISTA">Recepción</option>
+                <option value="MEDICO">Médico</option>
+                <option value="ADMINISTRADOR">Dirección</option>
+              </select>
+            </div>
+            <div class="acciones-form">
+              <button type="submit" class="btn">Crear cuenta</button>
+              <button type="button" class="btn-sec" id="btn-cancelar-usuario">Cancelar</button>
+            </div>
+            <p id="u-msg" class="msg" hidden></p>
+          </form>
+        </div>
+
+        <div class="clave-emitida" id="clave-emitida" hidden></div>
+
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Persona</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th class="num">Sesiones</th>
+                <th>Último acceso</th>
+                <th class="der">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-usuarios"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

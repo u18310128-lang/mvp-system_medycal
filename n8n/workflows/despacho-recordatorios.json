@@ -1,0 +1,237 @@
+{
+  "id": "despachoRecord01",
+  "name": "Despacho de recordatorios",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "a1000000-0000-4000-8000-000000000001",
+      "name": "Cada minuto",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:3000/api/recordatorios/pendientes",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"limite\": 50}",
+        "options": {},
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "zopLHET-SmMgZRNGaLa6C5zWP-JgPGSY"
+            }
+          ]
+        }
+      },
+      "id": "a1000000-0000-4000-8000-000000000002",
+      "name": "Reclamar vencidos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -140,
+        0
+      ],
+      "notes": "La aplicación decide qué corresponde enviar: verifica el estado de la cita y el consentimiento vigente (Ley 29733), y marca los recordatorios como ENCOLADO de forma atómica."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-hay-datos",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000003",
+      "name": "¿Hay pendientes?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        80,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "asg-1",
+              "name": "mensaje",
+              "value": "=Hola {{ $json.paciente_nombres }}, le recordamos su cita en el Consultorio Perú Ruso el {{ $json.fecha }} a las {{ $json.hora }} con {{ $json.medico }}. Responda CONFIRMO para confirmar o BAJA para no recibir más recordatorios.",
+              "type": "string"
+            },
+            {
+              "id": "asg-2",
+              "name": "destino",
+              "value": "={{ $json.celular }}",
+              "type": "string"
+            },
+            {
+              "id": "asg-3",
+              "name": "recordatorio_id",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "asg-4",
+              "name": "clave_idempotencia",
+              "value": "={{ $json.clave_idempotencia }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000004",
+      "name": "Componer mensaje",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        300,
+        0
+      ],
+      "notes": "El mensaje contiene únicamente fecha, hora y profesional. Ningún dato clínico, por exigencia de la Ley N.° 29733 sobre datos sensibles de salud."
+    },
+    {
+      "parameters": {
+        "jsCode": "// ENVÍO SIMULADO\n//\n// Meta todavía no aprueba las plantillas de WhatsApp Business, así que\n// este nodo registra el mensaje en lugar de enviarlo.\n//\n// Al aprobarse las plantillas, se reemplaza este nodo por un HTTP Request\n// a https://graph.facebook.com/v21.0/{phone_number_id}/messages\n// y el resto del flujo queda igual.\n\nfor (const item of $input.all()) {\n  console.log('[SIMULADO]', item.json.destino, '->', item.json.mensaje);\n  item.json.exito = true;\n  item.json.proveedor_msg_id = 'sim_' + item.json.clave_idempotencia;\n}\n\nreturn $input.all();"
+      },
+      "id": "a1000000-0000-4000-8000-000000000005",
+      "name": "Enviar por WhatsApp (simulado)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        0
+      ],
+      "notes": "Reemplazar por la llamada real a la Cloud API cuando Meta apruebe las plantillas."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:3000/api/recordatorios/{{ $json.recordatorio_id }}/resultado",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"exito\": {{ $json.exito }}, \"proveedor_msg_id\": \"{{ $json.proveedor_msg_id }}\"}",
+        "options": {},
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "zopLHET-SmMgZRNGaLa6C5zWP-JgPGSY"
+            }
+          ]
+        }
+      },
+      "id": "a1000000-0000-4000-8000-000000000006",
+      "name": "Informar resultado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        0
+      ],
+      "notes": "La aplicación pasa el recordatorio de ENCOLADO a ENVIADO o FALLIDO. Si el registro ya no está encolado responde 409, lo que evita la doble contabilización."
+    }
+  ],
+  "connections": {
+    "Cada minuto": {
+      "main": [
+        [
+          {
+            "node": "Reclamar vencidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reclamar vencidos": {
+      "main": [
+        [
+          {
+            "node": "¿Hay pendientes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Hay pendientes?": {
+      "main": [
+        [
+          {
+            "node": "Componer mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Componer mensaje": {
+      "main": [
+        [
+          {
+            "node": "Enviar por WhatsApp (simulado)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar por WhatsApp (simulado)": {
+      "main": [
+        [
+          {
+            "node": "Informar resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Lima"
+  },
+  "tags": []
+}

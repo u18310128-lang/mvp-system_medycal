@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acceso — Consultorio Perú Ruso</title>
+<link rel="stylesheet" href="/styles.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icono-192.png">
+<meta name="theme-color" content="#0E5D50">
+</head>
+<body>
+
+<div class="acceso-pagina">
+
+  <!-- =============== presentación =============== -->
+  <aside class="acceso-lado">
+    <div class="brand">
+      <span class="mark">PR</span>
+      <div>
+        <h1>Consultorio Perú Ruso</h1>
+        <p>Sistema web automatizado de gestión de citas</p>
+      </div>
+    </div>
+
+    <div class="acceso-lema">
+      <h2>Menos ausencias, más pacientes atendidos.</h2>
+      <p>
+        El sistema programa los recordatorios de cada cita, registra las
+        confirmaciones y mide el ausentismo antes y después de la intervención.
+      </p>
+
+      <div class="roles-lista">
+        <div class="rol-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/>
+          </svg>
+          <div>
+            <b>Recepción</b>
+            <span>Registra citas, confirma asistencia y gestiona la agenda del día.</span>
+          </div>
+        </div>
+
+        <div class="rol-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/>
+          </svg>
+          <div>
+            <b>Médico</b>
+            <span>Consulta únicamente su propia agenda y cierra la asistencia.</span>
+          </div>
+        </div>
+
+        <div class="rol-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>
+          </svg>
+          <div>
+            <b>Dirección</b>
+            <span>Accede además a los indicadores del estudio y a la exportación de datos.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="acceso-pie-lado">
+      Cada acceso y cada consulta de datos personales quedan asentados en la
+      bitácora de auditoría, conforme a la Ley N.° 29733 de Protección de Datos
+      Personales.
+    </p>
+  </aside>
+
+  <!-- =============== formulario =============== -->
+  <main class="acceso-panel">
+    <div class="acceso">
+
+      <div class="marca-compacta">
+        <span class="mark">PR</span>
+        <div>
+          <h1 style="margin:0;font-size:14.5px;font-weight:650">Consultorio Perú Ruso</h1>
+          <p style="margin:2px 0 0;font-size:11.5px;color:var(--muted)">Sistema de gestión de citas</p>
+        </div>
+      </div>
+
+      <h2>Ingresar</h2>
+      <p class="bienvenida">Usá la cuenta que te asignó el consultorio.</p>
+
+      <form id="form-acceso" autocomplete="on">
+        <div class="campo">
+          <label for="email">Correo</label>
+          <input type="email" id="email" name="email" required
+                 autocomplete="username" autofocus
+                 placeholder="nombre@peruruso.pe">
+        </div>
+
+        <div class="campo campo-clave">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" name="password" required
+                 autocomplete="current-password">
+          <button type="button" class="ver-clave" id="btn-ver"
+                  aria-controls="password" aria-pressed="false">Mostrar</button>
+        </div>
+
+        <button type="submit" class="btn" id="btn-entrar">Ingresar</button>
+        <p id="msg" class="msg" hidden role="alert"></p>
+      </form>
+
+      <div class="roles-mini">
+        <span class="rotulo">Tu rol define lo que verás</span>
+        <div class="roles-mini-lista">
+          <div class="roles-mini-item">
+            <span class="rol-chip">Recepción</span>
+            <span>Agenda y registro de citas</span>
+          </div>
+          <div class="roles-mini-item">
+            <span class="rol-chip">Médico</span>
+            <span>Su propia agenda</span>
+          </div>
+          <div class="roles-mini-item">
+            <span class="rol-chip">Dirección</span>
+            <span>Todo, más los indicadores</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="pie-acceso">
+        Tras cinco intentos fallidos el acceso a esa cuenta queda bloqueado
+        durante quince minutos.
+      </p>
+    </div>
+  </main>
+
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+
+/* ---- mostrar u ocultar la contraseña ---- */
+$("#btn-ver").addEventListener("click", () => {
+  const campo = $("#password");
+  const oculta = campo.type === "password";
+  campo.type = oculta ? "text" : "password";
+  $("#btn-ver").textContent = oculta ? "Ocultar" : "Mostrar";
+  $("#btn-ver").setAttribute("aria-pressed", String(oculta));
+  campo.focus();
+});
+
+/* ---- envío ---- */
+$("#form-acceso").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = $("#msg");
+  const btn = $("#btn-entrar");
+  msg.hidden = true;
+  btn.disabled = true;
+  btn.textContent = "Verificando…";
+
+  try {
+    const r = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: $("#email").value, password: $("#password").value }),
+    });
+    const cuerpo = await r.json();
+    if (!r.ok) throw new Error(cuerpo.error ?? "No se pudo iniciar sesión.");
+    location.href = "/";
+  } catch (error) {
+    msg.className = "msg error";
+    msg.textContent = error.message;
+    msg.hidden = false;
+    $("#password").value = "";
+    $("#password").type = "password";
+    $("#btn-ver").textContent = "Mostrar";
+    $("#password").focus();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Ingresar";
+  }
+});
+</script>
+</body>
+</html>
