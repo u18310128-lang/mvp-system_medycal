@@ -9,7 +9,7 @@ import { DirectorioPostgres } from "../agenda/DirectorioPostgres.js";
 import { ConversacionesPostgres } from "../agenda/ConversacionesPostgres.js";
 import { LlmOpenAI } from "../llm/LlmOpenAI.js";
 import { LlmSimulado } from "../llm/LlmSimulado.js";
-import { requiereClaveServicio } from "./middleware.js";
+import { requiereClaveServicio, requierePermiso } from "./middleware.js";
 
 /**
  * Superficie del canal conversacional.
@@ -346,6 +346,65 @@ agente.post(
       herramientas: respuesta.herramientas,
       latencia_ms: respuesta.latenciaTotalMs,
     });
+  })
+);
+
+/**
+ * Simulador: atender un mensaje desde el panel, con sesión iniciada.
+ *
+ * Mismo caso de uso que `/mensaje`, con otra puerta de entrada. El canal
+ * real se autentica con clave de servicio porque lo invoca WhatsApp, que no
+ * tiene sesión; acá adentro sí hay una persona identificada, y la clave no
+ * puede viajar al navegador. Cambia quién toca el timbre, no qué ocurre
+ * después: por eso la conversación que genera es indistinguible de una real
+ * y aparece en la sección de Conversaciones como cualquier otra.
+ */
+agente.post(
+  "/simular",
+  requierePermiso("VER_CONVERSACIONES"),
+  ruta(async (req, res) => {
+    const cuerpo = req.body as { celular?: string; texto?: string; entrada?: string };
+    const celular = String(cuerpo.celular ?? "").trim();
+    const texto = String(cuerpo.texto ?? "").trim();
+
+    if (celular === "" || texto === "") {
+      res.status(400).json({ error: "Se requieren celular y texto." });
+      return;
+    }
+
+    const respuesta = await casoDeUso.ejecutar({
+      celular,
+      texto,
+      entrada: cuerpo.entrada === "AUDIO" ? "AUDIO" : "TEXTO",
+      proveedorMsgId: null,
+      transcripcionMs: null,
+    });
+
+    res.json({
+      texto: respuesta.texto,
+      intencion: respuesta.intencion,
+      identidad: respuesta.identidad,
+      conversacion_id: respuesta.conversacionId,
+      herramientas: respuesta.herramientas,
+      latencia_ms: respuesta.latenciaTotalMs,
+    });
+  })
+);
+
+/** Pacientes con celular, para elegir desde quién se escribe en el simulador. */
+agente.get(
+  "/simular/pacientes",
+  requierePermiso("VER_CONVERSACIONES"),
+  ruta(async (_req, res) => {
+    res.json(
+      await consultar(
+        `SELECT celular, nombres || ' ' || apellidos AS nombre, num_doc
+         FROM paciente
+         WHERE celular IS NOT NULL
+         ORDER BY nombres
+         LIMIT 40`
+      )
+    );
   })
 );
 

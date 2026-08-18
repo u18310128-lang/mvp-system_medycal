@@ -1374,6 +1374,24 @@ app.get(
 );
 
 // =====================================================================
+// SALUD DEL SERVICIO
+// =====================================================================
+
+/**
+ * Sonda para el balanceador y el monitoreo.
+ *
+ * Va sin sesión porque quien la consulta es una máquina, y por eso mismo
+ * no revela nada: si la base está caída responde 503 sin decir por qué.
+ * Un detalle del motor acá es un dato gratis para quien sondea el servidor.
+ */
+app.get("/api/salud", (_req, res) => {
+  pool
+    .query("SELECT 1")
+    .then(() => res.json({ ok: true, hora: new Date().toISOString() }))
+    .catch(() => res.status(503).json({ ok: false }));
+});
+
+// =====================================================================
 
 app.use(manejadorErrores);
 

@@ -70,6 +70,10 @@ const ENCABEZADOS = {
     "Conversaciones",
     "Los hilos del agente y lo que decidió en cada turno.",
   ],
+  simulador: [
+    "Simulador de paciente",
+    "Escribile al agente como si fueras el paciente y mirá qué decide.",
+  ],
 };
 
 document.querySelectorAll(".tab").forEach((tab) => {
@@ -91,6 +95,7 @@ document.querySelectorAll(".tab").forEach((tab) => {
     if (tab.dataset.vista === "horarios") cargarHorarios();
     if (tab.dataset.vista === "usuarios") cargarUsuarios();
     if (tab.dataset.vista === "conversaciones") cargarConversaciones();
+    if (tab.dataset.vista === "simulador") cargarSimulador();
   });
 });
 
@@ -720,6 +725,159 @@ function kpi(rotulo, valor, detalle, ficha, clase = "") {
     <div class="ficha">FICHA TÉCNICA ${ficha}</div>
   </div>`;
 }
+
+/* ======================================================== SIMULADOR */
+
+let simTurnos = 0;
+let simUltimaCita = null;
+
+async function cargarSimulador() {
+  if ($("#sim-paciente").options.length) return;
+
+  const pacientes = await api("/api/agente/simular/pacientes");
+  $("#sim-paciente").innerHTML =
+    pacientes
+      .map((p) => `<option value="${p.celular}">${escapar(p.nombre)}</option>`)
+      .join("") +
+    // Un número fuera del padrón es un caso a probar, no un error: el
+    // agente debe conversar pero negarse a operar sobre citas.
+    `<option value="+51999000111">— Número no registrado —</option>`;
+
+  $("#sim-celular").value = pacientes[0]?.celular ?? "";
+}
+
+$("#sim-paciente").addEventListener("change", (e) => {
+  $("#sim-celular").value = e.target.value;
+  reiniciarSimulador();
+});
+
+function reiniciarSimulador() {
+  simTurnos = 0;
+  simUltimaCita = null;
+  $("#sim-hilo").innerHTML =
+    `<p class="hint sim-vacio">Escribí como si fueras el paciente. Por ejemplo:
+     «quiero una cita de medicina general el jueves por la tarde».</p>`;
+  $("#sim-traza").innerHTML = `<p class="hint">Todavía no hay turnos.</p>`;
+  $("#sim-ver-agenda").hidden = true;
+}
+
+$("#sim-reiniciar").addEventListener("click", reiniciarSimulador);
+
+$("#sim-audio").addEventListener("click", () => {
+  const boton = $("#sim-audio");
+  const activo = boton.getAttribute("aria-pressed") === "true";
+  boton.setAttribute("aria-pressed", String(!activo));
+  boton.title = activo ? "Enviar como nota de voz" : "Enviando como nota de voz";
+});
+
+$("#sim-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const texto = $("#sim-texto").value.trim();
+  const celular = $("#sim-celular").value.trim();
+  if (!texto || !celular) return;
+
+  const esAudio = $("#sim-audio").getAttribute("aria-pressed") === "true";
+
+  $("#sim-hilo").querySelector(".sim-vacio")?.remove();
+  agregarBurbuja("yo", texto, esAudio ? "🎤 nota de voz" : null);
+  $("#sim-texto").value = "";
+  $("#sim-texto").disabled = true;
+
+  const puntos = document.createElement("div");
+  puntos.className = "sim-escribiendo";
+  puntos.innerHTML = "<i></i><i></i><i></i>";
+  $("#sim-hilo").append(puntos);
+  bajarHilo();
+
+  try {
+    const r = await api("/api/agente/simular", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ celular, texto, entrada: esAudio ? "AUDIO" : "TEXTO" }),
+    });
+
+    puntos.remove();
+    agregarBurbuja("ellos", r.texto, `${r.latencia_ms} ms`);
+    agregarTurnoTraza(texto, r);
+    await detectarCitaCreada(r);
+  } catch (error) {
+    puntos.remove();
+    agregarBurbuja("ellos", `No se pudo atender el mensaje: ${error.message}`);
+  } finally {
+    $("#sim-texto").disabled = false;
+    $("#sim-texto").focus();
+  }
+});
+
+function agregarBurbuja(lado, texto, sello) {
+  const div = document.createElement("div");
+  div.className = `sim-burbuja ${lado}`;
+  div.innerHTML = `${escapar(texto)}${sello ? `<span class="sello">${escapar(sello)}</span>` : ""}`;
+  $("#sim-hilo").append(div);
+  bajarHilo();
+}
+
+function bajarHilo() {
+  const hilo = $("#sim-hilo");
+  hilo.scrollTop = hilo.scrollHeight;
+}
+
+function agregarTurnoTraza(dicho, r) {
+  if (simTurnos === 0) $("#sim-traza").innerHTML = "";
+  simTurnos++;
+
+  const herramientas = (r.herramientas ?? [])
+    .map((h) => `<span class="tool">${escapar(h.nombre ?? h)}</span>`)
+    .join("");
+  const sinExito = (r.herramientas ?? []).some((h) => h.exito === false);
+
+  const div = document.createElement("div");
+  div.className = `sim-turno${sinExito ? " sin-exito" : ""}`;
+  div.innerHTML = `
+    <div class="dicho">«${escapar(dicho)}»</div>
+    <div class="fila-traza">
+      <span class="etiqueta-int">${ETIQUETA_INTENCION[r.intencion] ?? r.intencion ?? "sin intención"}</span>
+      <span class="identidad-chip identidad-${r.identidad}">${r.identidad === "PACIENTE_IDENTIFICADO" ? "identificado" : "desconocido"}</span>
+    </div>
+    <div class="fila-traza">${herramientas || `<span class="ms">sin herramienta</span>`}</div>
+    <div class="fila-traza"><span class="ms">${r.latencia_ms} ms · conversación ${r.conversacion_id}</span></div>`;
+  $("#sim-traza").append(div);
+}
+
+/**
+ * ¿El turno terminó registrando una cita?
+ *
+ * Se pregunta por las citas del paciente en vez de confiar en el texto de
+ * la respuesta: lo que importa es lo que quedó en la base, no lo que el
+ * agente dice que hizo.
+ */
+async function detectarCitaCreada(r) {
+  if (!r.conversacion_id) return;
+
+  try {
+    const { citas } = await api(`/api/conversaciones/${r.conversacion_id}`);
+    const nueva = (citas ?? []).find(
+      (c) => c.origen === "AGENTE" && c.estado === "PROGRAMADA"
+    );
+    if (!nueva || nueva.id === simUltimaCita?.id) return;
+
+    simUltimaCita = nueva;
+    $("#sim-ver-agenda").hidden = false;
+    $("#sim-ver-agenda").textContent = `Ver la cita del ${nueva.fecha} en la agenda`;
+  } catch {
+    // El detector es un extra: si falla, la conversación sigue igual.
+  }
+}
+
+$("#sim-ver-agenda").addEventListener("click", () => {
+  if (!simUltimaCita) return;
+  // fecha viene DD/MM/AAAA; el campo de la agenda espera AAAA-MM-DD.
+  const [d, m, a] = simUltimaCita.fecha.split("/");
+  $("#fecha").value = `${a}-${m}-${d}`;
+  document.querySelector('.tab[data-vista="agenda"]').click();
+  cargarAgenda();
+});
 
 /* ===================================================== CONVERSACIONES */
 

@@ -62,6 +62,13 @@
         Indicadores
       </button>
 
+      <button class="tab" data-vista="simulador" data-requiere="VER_CONVERSACIONES" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18.5h2"/>
+        </svg>
+        Simulador
+      </button>
+
       <button class="tab" data-vista="conversaciones" data-requiere="VER_CONVERSACIONES" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/>
@@ -281,6 +288,56 @@
         </div>
 
         <p class="pie">Datos de demostración. Las cifras del capítulo de resultados provienen de los registros reales del consultorio.</p>
+      </section>
+
+      <!-- =============== SIMULADOR =============== -->
+      <section id="vista-simulador" class="vista">
+
+        <div class="herramientas">
+          <div class="campo">
+            <label for="sim-paciente">Escribir como</label>
+            <select id="sim-paciente"></select>
+          </div>
+          <div class="campo">
+            <label for="sim-celular">Número</label>
+            <input type="text" id="sim-celular" placeholder="+51..." autocomplete="off">
+          </div>
+          <button id="sim-reiniciar" class="btn-sec">Nueva conversación</button>
+          <button id="sim-ver-agenda" class="btn" hidden>Ver la cita en la agenda</button>
+        </div>
+
+        <div class="sim-layout">
+
+          <div class="telefono">
+            <div class="telefono-barra">
+              <span class="telefono-punto"></span>
+              <div>
+                <b id="sim-titulo">Consultorio Perú Ruso</b>
+                <span id="sim-estado-linea">en línea</span>
+              </div>
+            </div>
+
+            <div class="telefono-hilo" id="sim-hilo">
+              <p class="hint sim-vacio">
+                Escribí como si fueras el paciente. Por ejemplo:
+                «quiero una cita de medicina general el jueves por la tarde».
+              </p>
+            </div>
+
+            <form class="telefono-entrada" id="sim-form">
+              <input type="text" id="sim-texto" placeholder="Escribí un mensaje…" autocomplete="off" required>
+              <button type="button" id="sim-audio" class="sim-boton-audio" title="Enviar como nota de voz" aria-pressed="false">🎤</button>
+              <button type="submit" class="sim-enviar" aria-label="Enviar">➤</button>
+            </form>
+          </div>
+
+          <aside class="panel sim-traza">
+            <h3>Qué hizo el agente</h3>
+            <p class="sub">Turno por turno, en vivo.</p>
+            <div id="sim-traza"><p class="hint">Todavía no hay turnos.</p></div>
+          </aside>
+
+        </div>
       </section>
 
       <!-- =============== CONVERSACIONES =============== -->

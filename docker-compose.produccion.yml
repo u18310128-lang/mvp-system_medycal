@@ -1,0 +1,134 @@
+# =====================================================================
+#  Consultorio Perú Ruso — despliegue de producción
+#
+#    docker compose -f docker-compose.produccion.yml up -d
+#
+#  Cuatro servicios: la aplicación, PostgreSQL, n8n y Nginx como puerta
+#  de entrada. Solo Nginx publica puertos al exterior; el resto conversa
+#  por la red interna. Que la base no sea alcanzable desde internet no es
+#  una optimización, es la diferencia entre un incidente y una noticia.
+# =====================================================================
+
+name: peruruso
+
+services:
+  # -------------------------------------------------------------- app --
+  app:
+    build: .
+    container_name: peruruso-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      TZ: America/Lima
+      PORT: "3000"
+      BASE_URL: ${BASE_URL}
+
+      PGHOST: db
+      PGPORT: "5432"
+      PGDATABASE: ${PGDATABASE}
+      PGUSER: ${PGUSER}
+      PGPASSWORD: ${PGPASSWORD}
+
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      AGENTE_MODELO: ${AGENTE_MODELO:-gpt-4o-mini}
+      AGENTE_API_URL: http://app:3000
+      AGENTE_AGENDA: ${AGENTE_AGENDA:-http}
+      CLAVE_SERVICIO: ${CLAVE_SERVICIO}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [interna]
+
+  # --------------------------------------------------------------- db --
+  db:
+    image: postgres:18-alpine
+    container_name: peruruso-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PGDATABASE}
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      TZ: America/Lima
+    volumes:
+      - db-datos:/var/lib/postgresql/data
+      # Los .sql del directorio se ejecutan en orden solo la primera vez,
+      # cuando el volumen está vacío. Un redespliegue no los vuelve a correr.
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/migracion-auth.sql:/docker-entrypoint-initdb.d/02-auth.sql:ro
+      - ./db/migracion-agente.sql:/docker-entrypoint-initdb.d/03-agente.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER} -d ${PGDATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks: [interna]
+    # Sin `ports`: la base no se publica. Para conectarte desde tu máquina,
+    # abrí un túnel SSH en vez de exponer el puerto.
+
+  # -------------------------------------------------------------- n8n --
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: peruruso-n8n
+    restart: unless-stopped
+    environment:
+      GENERIC_TIMEZONE: America/Lima
+      TZ: America/Lima
+      N8N_HOST: ${DOMINIO}
+      N8N_PROTOCOL: https
+      N8N_SECURE_COOKIE: "true"
+      WEBHOOK_URL: https://${DOMINIO}/n8n/
+      N8N_PATH: /n8n/
+      # El editor de flujos exige usuario y contraseña: publica webhooks
+      # que disparan envíos a pacientes.
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_USUARIO}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      API_BASE: http://app:3000
+      N8N_DIAGNOSTICS_ENABLED: "false"
+    volumes:
+      - n8n-datos:/home/node/.n8n
+      - ./n8n/workflows:/workflows:ro
+    networks: [interna]
+
+  # ------------------------------------------------------------ nginx --
+  nginx:
+    image: nginx:alpine
+    container_name: peruruso-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # El directorio entero: Nginx incluye los .conf de conf.d dentro del
+      # bloque http, que es donde tiene que estar la zona del limitador.
+      - ./nginx:/etc/nginx/conf.d:ro
+      - certbot-certs:/etc/letsencrypt:ro
+      - certbot-raiz:/var/www/certbot:ro
+    depends_on: [app]
+    networks: [interna]
+
+  # ----------------------------------------------------------- certbot --
+  # Renueva el certificado cada 12 h. Let's Encrypt dura 90 días: sin esto,
+  # el sitio deja de cargar tres meses después del despliegue.
+  certbot:
+    image: certbot/certbot
+    container_name: peruruso-certbot
+    restart: unless-stopped
+    volumes:
+      - certbot-certs:/etc/letsencrypt
+      - certbot-raiz:/var/www/certbot
+    entrypoint: >
+      sh -c "trap exit TERM;
+      while :; do certbot renew --webroot -w /var/www/certbot --quiet;
+      sleep 12h & wait $${!}; done"
+
+volumes:
+  db-datos:
+  n8n-datos:
+  certbot-certs:
+  certbot-raiz:
+
+networks:
+  interna:
+    driver: bridge
