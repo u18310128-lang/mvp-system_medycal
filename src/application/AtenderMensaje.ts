@@ -17,6 +17,7 @@ import {
   type ContextoTurno,
   type Herramienta,
 } from "./herramientas.js";
+import { resolverIdentidad } from "./resolverIdentidad.js";
 import type {
   Agenda,
   Conversaciones,
@@ -126,14 +127,12 @@ export class AtenderMensaje {
       }
     }
 
-    const paciente = await directorio.porCelular(entrante.celular);
-    const identidad: IdentidadAgente =
-      paciente === null ? "ANONIMO" : "PACIENTE_IDENTIFICADO";
-
-    const hilo = await conversaciones.abrirOContinuar(
+    const { identidad, pacienteId, nombres } = await resolverIdentidad(
       entrante.celular,
-      paciente?.id ?? null
+      directorio
     );
+
+    const hilo = await conversaciones.abrirOContinuar(entrante.celular, pacienteId);
 
     const mensajeId = await conversaciones.registrarMensaje({
       conversacionId: hilo.id,
@@ -151,7 +150,7 @@ export class AtenderMensaje {
         rol: "sistema",
         contenido: this.instrucciones(
           identidad,
-          paciente?.nombres ?? null,
+          nombres,
           await this.deps.agenda.especialidades()
         ),
       },
@@ -208,7 +207,7 @@ export class AtenderMensaje {
           const tTool = performance.now();
           const salida = await this.ejecutarHerramienta(llamada, {
             identidad,
-            pacienteId: paciente?.id ?? null,
+            pacienteId,
             solicitud,
             reloj,
           });

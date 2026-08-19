@@ -195,13 +195,15 @@ h1, h2, h3 { letter-spacing: -0.015em; }
 
 /* En el riel solo entra el distintivo; el nombre vive en la cabecera. */
 .lateral .brand {
-  padding: 18px 0 16px;
+  height: 72px;
+  box-sizing: border-box;
+  padding: 14px 0;
   border-bottom: 1px solid rgba(255, 255, 255, .1);
   width: 100%;
   justify-content: center;
 }
 .lateral .brand > div { display: none; }
-.lateral .mark { background: rgba(255, 255, 255, .16); box-shadow: none; color: #fff; }
+.lateral .mark { background: transparent; box-shadow: none; border: 0; color: #fff; }
 
 .mark {
   width: 38px;
@@ -209,7 +211,9 @@ h1, h2, h3 { letter-spacing: -0.015em; }
   flex: none;
   display: grid;
   place-items: center;
-  background: linear-gradient(150deg, var(--accent-2), var(--accent));
+  object-fit: contain;
+  background: #101817;
+  border: 1px solid #263432;
   color: var(--on-accent);
   border-radius: var(--radio-sm);
   font-weight: 700;
@@ -235,6 +239,42 @@ h1, h2, h3 { letter-spacing: -0.015em; }
 
 .tabs .rotulo { display: none; }
 
+.panel-config {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 60px;
+  min-height: 56px;
+  margin: 10px 0 16px;
+  padding: 7px 4px 6px;
+  border: 1px solid rgba(207, 230, 224, .18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .06);
+  color: var(--riel-ink);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 550;
+  line-height: 1.15;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+}
+.panel-config svg { width: 23px; height: 23px; }
+.panel-config:hover { background: rgba(255, 255, 255, .13); border-color: rgba(207, 230, 224, .38); color: #fff; transform: translateY(-1px); }
+
+.modal-config { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: rgba(8, 20, 18, .58); backdrop-filter: blur(3px); }
+.modal-config[hidden] { display: none; }
+.modal-config-caja { width: min(100%, 460px); padding: 24px; border: 1px solid var(--line); border-radius: var(--radio-lg); background: var(--surface); box-shadow: 0 22px 60px rgba(0, 0, 0, .24); animation: entrar .18s ease; }
+.modal-config-cabecera { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.modal-config-cabecera h2 { margin: 5px 0 0; font-size: 20px; }
+.modal-cerrar { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--muted); font-size: 22px; line-height: 1; cursor: pointer; }
+.modal-cerrar:hover { color: var(--ink); background: var(--surface-2); }
+.form-config { display: grid; gap: 16px; }
+.form-config label { display: grid; gap: 7px; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.form-config input, .form-config select { width: 100%; }
+.config-preview { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid var(--line); }
+
 .tab {
   display: flex;
   flex-direction: column;
@@ -256,6 +296,7 @@ h1, h2, h3 { letter-spacing: -0.015em; }
 }
 
 .tab svg { width: 20px; height: 20px; flex: none; }
+.tab iconify-icon { width: 20px; height: 20px; font-size: 20px; flex: none; }
 .tab:hover { background: rgba(255, 255, 255, .08); color: var(--riel-ink); }
 .tab.activo {
   background: rgba(255, 255, 255, .15);
@@ -321,6 +362,8 @@ h1, h2, h3 { letter-spacing: -0.015em; }
 }
 
 .sesion-acciones { display: flex; gap: 6px; flex: none; }
+.tema iconify-icon { width: 18px; height: 18px; font-size: 18px; display: block; }
+.panel-config iconify-icon { width: 22px; height: 22px; font-size: 22px; display: block; }
 
 .salir, .tema {
   font: inherit;
@@ -377,6 +420,7 @@ main { padding: 26px 30px 80px; max-width: 1240px; }
   .lateral { position: static; height: auto; }
   .lateral .brand { display: none; }
   .tabs { flex-direction: row; overflow-x: auto; padding: 8px; justify-content: flex-start; }
+  .panel-config { margin: 4px auto 8px; }
   .tab { flex-direction: row; width: auto; white-space: nowrap; font-size: 13px; padding: 8px 13px; }
   .cabecera { flex-wrap: wrap; padding-left: 18px; padding-right: 18px; }
   main { padding-left: 18px; padding-right: 18px; }
@@ -721,7 +765,7 @@ td.doc { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
 }
 @media (min-width: 940px) { .acceso-lado { display: flex; } }
 
-.acceso-lado .mark { background: rgba(255, 255, 255, .17); box-shadow: none; color: #fff; }
+.acceso-lado .mark { background: #101817; box-shadow: none; border: 1px solid #263432; color: #fff; }
 .acceso-lado .brand { border-bottom: 0; padding: 0; }
 .acceso-lado .brand h1 { color: #fff; font-size: 15px; }
 .acceso-lado .brand p { color: rgba(255, 255, 255, .72); }

@@ -111,6 +111,42 @@ $("#btn-tema").addEventListener("click", () => {
   localStorage.setItem("tema", nuevo);
 });
 
+/* ------------------------------------------------------ configuración */
+const modalConfig = $("#modal-config");
+const configNombre = $("#config-nombre");
+const configIdioma = $("#config-idioma");
+const configPreview = $("#config-preview");
+
+function abrirConfiguracion() {
+  configNombre.value = localStorage.getItem("perfil_nombre") ?? $("#sesion-nombre")?.textContent ?? "";
+  configIdioma.value = localStorage.getItem("perfil_idioma") ?? "es";
+  const foto = localStorage.getItem("perfil_foto");
+  configPreview.hidden = !foto;
+  if (foto) configPreview.src = foto;
+  modalConfig.hidden = false;
+  configNombre.focus();
+}
+
+$("#btn-configuracion").addEventListener("click", abrirConfiguracion);
+$("#btn-cerrar-config").addEventListener("click", () => { modalConfig.hidden = true; });
+$("#btn-cancelar-config").addEventListener("click", () => { modalConfig.hidden = true; });
+$("#config-foto").addEventListener("change", () => {
+  const archivo = $("#config-foto").files?.[0];
+  if (!archivo) return;
+  const lector = new FileReader();
+  lector.addEventListener("load", () => { configPreview.src = String(lector.result); configPreview.hidden = false; });
+  lector.readAsDataURL(archivo);
+});
+$("#form-config").addEventListener("submit", (evento) => {
+  evento.preventDefault();
+  localStorage.setItem("perfil_nombre", configNombre.value.trim());
+  localStorage.setItem("perfil_idioma", configIdioma.value);
+  if (!configPreview.hidden) localStorage.setItem("perfil_foto", configPreview.src);
+  const nombre = $("#sesion-nombre");
+  if (nombre && configNombre.value.trim()) nombre.textContent = configNombre.value.trim();
+  modalConfig.hidden = true;
+});
+
 /* ============================================================ AGENDA */
 
 const COLUMNAS = 8;

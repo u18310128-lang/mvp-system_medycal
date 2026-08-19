@@ -32,15 +32,15 @@
         "jsonBody": "={\"limite\": 50}",
         "options": {},
         "sendHeaders": true,
-        "specifyHeaders": "keypair",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "x-api-key",
-              "value": "zopLHET-SmMgZRNGaLa6C5zWP-JgPGSY"
-            }
-          ]
-        }
+          "specifyHeaders": "keypair",
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "={{ $env.CLAVE_SERVICIO }}"
+              }
+            ]
+          }
       },
       "id": "a1000000-0000-4000-8000-000000000002",
       "name": "Reclamar vencidos",
@@ -153,11 +153,11 @@
         "sendHeaders": true,
         "specifyHeaders": "keypair",
         "headerParameters": {
-          "parameters": [
-            {
-              "name": "x-api-key",
-              "value": "zopLHET-SmMgZRNGaLa6C5zWP-JgPGSY"
-            }
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "={{ $env.CLAVE_SERVICIO }}"
+              }
           ]
         }
       },

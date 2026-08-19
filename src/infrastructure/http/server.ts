@@ -33,6 +33,9 @@ import {
 } from "./middleware.js";
 import { publico, emitirEnlace } from "./publico.js";
 import { agente } from "./agente.js";
+import { agenteHerramientas } from "./agenteHerramientas.js";
+import { agendaSegunEntorno } from "../agenda/AgendaHttp.js";
+import { DirectorioPostgres } from "../agenda/DirectorioPostgres.js";
 import { registrarCita, HorarioOcupado } from "../citas/registrarCita.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -90,6 +93,12 @@ app.use("/api/publico", publico);
 // Se autentica con clave de servicio, igual que n8n; el alcance sobre las
 // citas lo decide el dominio según el número desde el que escriben.
 app.use("/api/agente", agente);
+
+// Las mismas herramientas, sueltas como rutas HTTP para un orquestador
+// externo (el nodo AI Agent de n8n). El bucle de AtenderMensaje sigue
+// siendo el agente por defecto; esto es una segunda entrada al mismo
+// dominio, no un segundo agente.
+app.use("/api/agente/tool", agenteHerramientas(agendaSegunEntorno(), new DirectorioPostgres()));
 
 /** El enlace corto que viaja en el mensaje. */
 app.get("/c/:token", (_req, res) => {

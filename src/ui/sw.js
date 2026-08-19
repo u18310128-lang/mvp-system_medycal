@@ -7,7 +7,7 @@
    primera hace que alguien atienda al paciente equivocado.
    ===================================================================== */
 
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE = `peruruso-${VERSION}`;
 
 /** Lo mínimo para que la aplicación dibuje algo sin red. */
@@ -16,6 +16,7 @@ const ARMAZON = [
   "/offline.html",
   "/styles.css",
   "/app.js",
+  "/logo.png",
   "/icono.svg",
   "/icono-192.png",
   "/manifest.webmanifest",

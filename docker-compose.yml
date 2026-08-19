@@ -34,6 +34,14 @@ services:
       # En Docker Desktop (Windows y Mac) host.docker.internal apunta al host.
       API_BASE: http://host.docker.internal:3000
 
+      # La misma clave que valida la aplicación en /api/recordatorios/*.
+      # Compose la toma del .env local; nunca se escribe en el workflow.
+      CLAVE_SERVICIO: ${CLAVE_SERVICIO}
+
+      # El workflow usa $env.CLAVE_SERVICIO en el nodo HTTP.
+      # n8n 2.x bloquea ese acceso por defecto.
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+
       N8N_DIAGNOSTICS_ENABLED: "false"
       N8N_RUNNERS_ENABLED: "true"
       N8N_LOG_LEVEL: info

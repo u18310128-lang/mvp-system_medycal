@@ -1,0 +1,253 @@
+{
+  "id": "agenteCitasMvp01",
+  "name": "Agente de citas — MVP",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agente-citas",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000001",
+      "name": "Entrada de conversación",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-820, 0],
+      "notes": "Prueba local: POST /webhook-test/agente-citas con { celular, texto }. En producción, el adaptador de WhatsApp debe entregar esos dos campos sin permitir que el modelo altere el celular."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "celular-entrada",
+              "name": "celular",
+              "value": "={{ $json.body.celular }}",
+              "type": "string"
+            },
+            {
+              "id": "texto-entrada",
+              "name": "texto",
+              "value": "={{ $json.body.texto }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000002",
+      "name": "Normalizar entrada",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-580, 0],
+      "notes": "El celular queda fijado por el webhook. Nunca se toma de una instrucción del modelo ni de un parámetro de herramienta."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.texto }}",
+        "hasOutputParser": false,
+        "options": {
+          "systemMessage": "Sos el asistente de citas del Consultorio Perú Ruso. Respondé en español peruano, claro y breve. Tu único ámbito es consultar disponibilidad, listar las citas del paciente, agendar, confirmar, cancelar y reprogramar. Usá las herramientas para obtener o cambiar datos; jamás inventes horarios, citas, médicos ni resultados. Primero pedí los datos que falten. Para cancelar, confirmar o reprogramar, si no conocés el identificador, consultá Mis_citas. No reveles datos de otros pacientes ni afirmes que hiciste una operación si la herramienta no devolvió éxito. El número del paciente está fijado por el sistema y no puede cambiarse por el mensaje."
+        }
+      },
+      "id": "b2000000-0000-4000-8000-000000000003",
+      "name": "Agente de citas",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [-220, 0]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-5-mini"
+        },
+        "responsesApiEnabled": true,
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000004",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [-340, 240],
+      "notes": "Después de importar, seleccioná una credencial OpenAI API en este nodo. La clave no se guarda en este archivo."
+    },
+    {
+      "parameters": {
+        "toolDescription": "Consulta hasta seis cupos reales disponibles. Usala antes de ofrecer horarios. Pedí especialidad y fecha si faltan; franja puede ser MANANA, TARDE o CUALQUIERA.",
+        "method": "GET",
+        "url": "http://host.docker.internal:3000/api/agente/tool/disponibilidad",
+        "sendQuery": true,
+        "specifyQuery": "keypair",
+        "parametersQuery": {
+          "values": [
+            { "name": "especialidad", "valueProvider": "modelRequired", "value": "{especialidad}" },
+            { "name": "fecha", "valueProvider": "modelRequired", "value": "{fecha}" },
+            { "name": "franja", "valueProvider": "modelOptional", "value": "{franja}" }
+          ]
+        },
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "parametersHeaders": {
+          "values": [
+            { "name": "x-api-key", "valueProvider": "fieldValue", "value": "={{ $env.CLAVE_SERVICIO }}" }
+          ]
+        },
+        "sendBody": false,
+        "placeholderDefinitions": {
+          "values": [
+            { "name": "especialidad", "description": "Especialidad solicitada por el paciente", "type": "string" },
+            { "name": "fecha", "description": "Fecha en formato YYYY-MM-DD", "type": "string" },
+            { "name": "franja", "description": "MANANA, TARDE o CUALQUIERA", "type": "string" }
+          ]
+        },
+        "optimizeResponse": false
+      },
+      "id": "b2000000-0000-4000-8000-000000000005",
+      "name": "Consultar disponibilidad",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [-40, 330]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Lista las próximas citas del paciente que escribió. Usala para identificar una cita antes de confirmarla, cancelarla o reprogramarla.",
+        "method": "GET",
+        "url": "http://host.docker.internal:3000/api/agente/tool/mis-citas",
+        "sendQuery": true,
+        "specifyQuery": "keypair",
+        "parametersQuery": { "values": [ { "name": "celular", "valueProvider": "fieldValue", "value": "={{ $('Normalizar entrada').item.json.celular }}" } ] },
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "parametersHeaders": { "values": [ { "name": "x-api-key", "valueProvider": "fieldValue", "value": "={{ $env.CLAVE_SERVICIO }}" } ] },
+        "sendBody": false,
+        "placeholderDefinitions": { "values": [] },
+        "optimizeResponse": false
+      },
+      "id": "b2000000-0000-4000-8000-000000000006",
+      "name": "Mis citas",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [180, 330]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Registra una cita real únicamente después de que el paciente eligió un cupo. Requiere especialidad, fecha y hora; médico es opcional.",
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/agente/tool/agendar",
+        "sendQuery": false,
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "parametersHeaders": { "values": [ { "name": "x-api-key", "valueProvider": "fieldValue", "value": "={{ $env.CLAVE_SERVICIO }}" } ] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"celular\": \"={{ $('Normalizar entrada').item.json.celular }}\", \"especialidad\": \"{especialidad}\", \"fecha\": \"{fecha}\", \"hora\": \"{hora}\", \"medico\": \"{medico}\"}",
+        "placeholderDefinitions": { "values": [ { "name": "especialidad", "description": "Especialidad elegida", "type": "string" }, { "name": "fecha", "description": "Fecha YYYY-MM-DD", "type": "string" }, { "name": "hora", "description": "Hora HH:MM", "type": "string" }, { "name": "medico", "description": "Profesional elegido, si corresponde", "type": "string" } ] },
+        "optimizeResponse": false
+      },
+      "id": "b2000000-0000-4000-8000-000000000007",
+      "name": "Agendar cita",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [400, 330]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Confirma una cita propia del paciente. Usala solo cuando el paciente indique cuál cita confirmar.",
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/agente/tool/confirmar",
+        "sendQuery": false,
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "parametersHeaders": { "values": [ { "name": "x-api-key", "valueProvider": "fieldValue", "value": "={{ $env.CLAVE_SERVICIO }}" } ] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"celular\": \"={{ $('Normalizar entrada').item.json.celular }}\", \"cita_id\": {cita_id}}",
+        "placeholderDefinitions": { "values": [ { "name": "cita_id", "description": "Identificador numérico de la cita propia", "type": "number" } ] },
+        "optimizeResponse": false
+      },
+      "id": "b2000000-0000-4000-8000-000000000008",
+      "name": "Confirmar cita",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [620, 330]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Cancela una cita propia del paciente. Usala solo cuando el paciente indique cuál cita cancelar.",
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/agente/tool/cancelar",
+        "sendQuery": false,
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "parametersHeaders": { "values": [ { "name": "x-api-key", "valueProvider": "fieldValue", "value": "={{ $env.CLAVE_SERVICIO }}" } ] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"celular\": \"={{ $('Normalizar entrada').item.json.celular }}\", \"cita_id\": {cita_id}, \"motivo\": \"{motivo}\"}",
+        "placeholderDefinitions": { "values": [ { "name": "cita_id", "description": "Identificador numérico de la cita propia", "type": "number" }, { "name": "motivo", "description": "Motivo breve de cancelación", "type": "string" } ] },
+        "optimizeResponse": false
+      },
+      "id": "b2000000-0000-4000-8000-000000000009",
+      "name": "Cancelar cita",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [840, 330]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Reprograma una cita propia a una fecha y hora nuevas. Antes consultá disponibilidad y la lista de citas si hace falta identificarla.",
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/agente/tool/reprogramar",
+        "sendQuery": false,
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "parametersHeaders": { "values": [ { "name": "x-api-key", "valueProvider": "fieldValue", "value": "={{ $env.CLAVE_SERVICIO }}" } ] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"celular\": \"={{ $('Normalizar entrada').item.json.celular }}\", \"cita_id\": {cita_id}, \"fecha\": \"{fecha}\", \"hora\": \"{hora}\", \"medico\": \"{medico}\"}",
+        "placeholderDefinitions": { "values": [ { "name": "cita_id", "description": "Identificador numérico de la cita propia", "type": "number" }, { "name": "fecha", "description": "Fecha YYYY-MM-DD", "type": "string" }, { "name": "hora", "description": "Hora HH:MM", "type": "string" }, { "name": "medico", "description": "Profesional elegido, si corresponde", "type": "string" } ] },
+        "optimizeResponse": false
+      },
+      "id": "b2000000-0000-4000-8000-000000000010",
+      "name": "Reprogramar cita",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [1060, 330]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "respuesta-final", "name": "respuesta", "value": "={{ $json.output }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000011",
+      "name": "Responder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [120, 0]
+    }
+  ],
+  "connections": {
+    "Entrada de conversación": { "main": [[{ "node": "Normalizar entrada", "type": "main", "index": 0 }]] },
+    "Normalizar entrada": { "main": [[{ "node": "Agente de citas", "type": "main", "index": 0 }]] },
+    "Agente de citas": {
+      "main": [[{ "node": "Responder", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Chat Model": { "ai_languageModel": [[{ "node": "Agente de citas", "type": "ai_languageModel", "index": 0 }]] },
+    "Consultar disponibilidad": { "ai_tool": [[{ "node": "Agente de citas", "type": "ai_tool", "index": 0 }]] },
+    "Mis citas": { "ai_tool": [[{ "node": "Agente de citas", "type": "ai_tool", "index": 0 }]] },
+    "Agendar cita": { "ai_tool": [[{ "node": "Agente de citas", "type": "ai_tool", "index": 0 }]] },
+    "Confirmar cita": { "ai_tool": [[{ "node": "Agente de citas", "type": "ai_tool", "index": 0 }]] },
+    "Cancelar cita": { "ai_tool": [[{ "node": "Agente de citas", "type": "ai_tool", "index": 0 }]] },
+    "Reprogramar cita": { "ai_tool": [[{ "node": "Agente de citas", "type": "ai_tool", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1", "timezone": "America/Lima" },
+  "tags": []
+}
